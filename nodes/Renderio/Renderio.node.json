@@ -1,0 +1,21 @@
+{
+	"node": "n8n-nodes-renderio.renderio",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Development", "Miscellaneous", "Videos"],
+	"subcategories": {
+		"Development": ["Other"]
+	},
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://renderio.dev/docs/getting-started/authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://renderio.dev/docs"
+			}
+		]
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"nodes": [
+		{
+			"name": "Get command",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "command",
+				"operation": "get",
+				"commandId": "cmd-550e8400-e29b-41d4-a716-446655440000"
+			}
+		}
+	]
+}

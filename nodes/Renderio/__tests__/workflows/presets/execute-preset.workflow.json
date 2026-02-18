@@ -1,0 +1,21 @@
+{
+	"nodes": [
+		{
+			"name": "Execute preset",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "preset",
+				"operation": "execute",
+				"presetId": { "value": "preset-550e8400-e29b-41d4-a716-446655440000" },
+				"inputFiles": {
+					"fileValues": [
+						{ "key": "in_video", "value": "https://example.com/input.mp4" }
+					]
+				},
+				"executeOptions": {}
+			}
+		}
+	]
+}

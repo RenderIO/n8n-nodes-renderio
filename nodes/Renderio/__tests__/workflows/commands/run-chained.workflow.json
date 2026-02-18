@@ -1,0 +1,32 @@
+{
+	"nodes": [
+		{
+			"name": "Run chained",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "command",
+				"operation": "runChained",
+				"inputFiles": {
+					"fileValues": [
+						{ "key": "in_video", "value": "https://example.com/input.mp4" }
+					]
+				},
+				"outputFiles": {
+					"fileValues": [
+						{ "key": "out_video", "value": "intermediate.mp4" },
+						{ "key": "out_final", "value": "final.mp4" }
+					]
+				},
+				"ffmpegCommands": {
+					"commandValues": [
+						{ "command": "-i {{in_video}} -vf scale=1280:720 {{out_video}}" },
+						{ "command": "-i {{out_video}} -c:v libx265 {{out_final}}" }
+					]
+				},
+				"metadata": {}
+			}
+		}
+	]
+}

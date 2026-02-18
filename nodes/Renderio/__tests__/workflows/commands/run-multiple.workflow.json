@@ -1,0 +1,44 @@
+{
+	"nodes": [
+		{
+			"name": "Run multiple",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "command",
+				"operation": "runMultiple",
+				"commands": {
+					"commandValues": [
+						{
+							"ffmpegCommand": "-i {{in_video}} -c:v libx264 {{out_video}}",
+							"inputFiles": {
+								"fileValues": [
+									{ "key": "in_video", "value": "https://example.com/input.mp4" }
+								]
+							},
+							"outputFiles": {
+								"fileValues": [
+									{ "key": "out_video", "value": "output.mp4" }
+								]
+							}
+						},
+						{
+							"ffmpegCommand": "-i {{in_audio}} -c:a aac {{out_audio}}",
+							"inputFiles": {
+								"fileValues": [
+									{ "key": "in_audio", "value": "https://example.com/input.wav" }
+								]
+							},
+							"outputFiles": {
+								"fileValues": [
+									{ "key": "out_audio", "value": "output.aac" }
+								]
+							}
+						}
+					]
+				}
+			}
+		}
+	]
+}

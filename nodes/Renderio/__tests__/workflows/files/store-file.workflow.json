@@ -1,0 +1,15 @@
+{
+	"nodes": [
+		{
+			"name": "Store file",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "file",
+				"operation": "store",
+				"fileUrl": "https://example.com/video.mp4"
+			}
+		}
+	]
+}
