@@ -1,6 +1,6 @@
 {
     "name": "@renderio/n8n-nodes-renderio",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "n8n community node for RenderIO - run FFmpeg commands in the cloud",
     "license": "MIT",
     "homepage": "https://renderio.dev",
@@ -19,16 +19,16 @@
         "type": "git",
         "url": "https://github.com/RenderIO/n8n-nodes-renderio.git"
     },
-   "scripts": {
-		"build": "n8n-node build",
-		"build:watch": "tsc --watch",
-		"dev": "n8n-node dev",
-		"lint": "n8n-node lint",
-		"lint:fix": "n8n-node lint --fix",
-		"test": "jest --config jest.config.js",
-		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
-	},
+    "scripts": {
+        "build": "n8n-node build",
+        "build:watch": "tsc --watch",
+        "dev": "n8n-node dev",
+        "lint": "n8n-node lint",
+        "lint:fix": "n8n-node lint --fix",
+        "test": "jest --config jest.config.js",
+        "release": "n8n-node release",
+        "prepublishOnly": "n8n-node prerelease"
+    },
     "files": [
         "dist"
     ],
