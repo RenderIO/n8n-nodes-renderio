@@ -1,5 +1,5 @@
 {
-    "name": "@renderio/n8n-nodes-renderio",
+    "name": "n8n-nodes-renderio",
     "version": "0.0.4",
     "description": "n8n community node for RenderIO - run FFmpeg commands in the cloud",
     "license": "MIT",
