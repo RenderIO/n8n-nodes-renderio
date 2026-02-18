@@ -34,6 +34,11 @@ jobs:
 
       - name: Run tests
         run: npm run test
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "RenderIO Release Bot"
+          git config --global user.email "noreply@renderio.dev"
 
       - name: Extract release version
         id: get_version
