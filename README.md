@@ -64,7 +64,7 @@ nvm use
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/saikoubarry/n8n-nodes-renderio.git
+git clone https://github.com/RenderIO/n8n-nodes-renderio.git
 cd n8n-nodes-renderio
 npm install
 ```
@@ -222,4 +222,4 @@ If you encounter issues:
 
 1. Check the [RenderIO API Documentation](https://renderio.dev/docs)
 2. Review the [n8n Community Nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
-3. Open an issue in the [GitHub repository](https://github.com/saikoubarry/n8n-nodes-renderio)
+3. Open an issue in the [GitHub repository](https://github.com/RenderIO/n8n-nodes-renderio)
