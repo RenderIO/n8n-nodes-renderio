@@ -9,6 +9,7 @@ import type {
 } from 'n8n-workflow';
 
 import {
+	NodeConnectionTypes,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -35,45 +36,15 @@ export class Renderio implements INodeType {
 			name: 'RenderIO',
 		},
 		usableAsTool: true,
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
-			{
-				name: 'renderioOAuth2Api',
-				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
-			},
 			{
 				name: 'renderioApi',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['apiKey'],
-					},
-				},
 			},
 		],
 		properties: [
-			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				options: [
-					{
-						name: 'API Key',
-						value: 'apiKey',
-					},
-					{
-						name: 'OAuth2',
-						value: 'oAuth2',
-					},
-				],
-				default: 'oAuth2',
-			},
 			{
 				displayName: 'Resource',
 				name: 'resource',

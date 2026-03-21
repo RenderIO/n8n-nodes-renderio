@@ -34,8 +34,7 @@
     "n8n": {
         "n8nNodesApiVersion": 1,
         "credentials": [
-            "dist/credentials/RenderioApi.credentials.js",
-            "dist/credentials/RenderioOAuth2Api.credentials.js"
+            "dist/credentials/RenderioApi.credentials.js"
         ],
         "nodes": [
             "dist/nodes/Renderio/Renderio.node.js"

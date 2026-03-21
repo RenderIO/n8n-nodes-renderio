@@ -9,7 +9,6 @@ import type {
 /**
  * Make an authenticated API request to the RenderIO API.
  *
- * Supports both API Key and OAuth2 authentication.
  * Uses `httpRequestWithAuthentication` so that credentials are injected automatically.
  */
 export async function renderioApiRequest(
@@ -19,16 +18,8 @@ export async function renderioApiRequest(
 	body?: IDataObject,
 	qs?: IDataObject,
 ): Promise<IDataObject> {
-	const authType = this.getNodeParameter('authentication', 0) as string;
-	const credentialType = authType === 'oAuth2' ? 'renderioOAuth2Api' : 'renderioApi';
-
-	let baseUrl: string;
-	if (authType === 'oAuth2') {
-		baseUrl = 'https://renderio.dev';
-	} else {
-		const credentials = await this.getCredentials('renderioApi');
-		baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
-	}
+	const credentials = await this.getCredentials('renderioApi');
+	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
 
 	const options: IHttpRequestOptions = {
 		method,
@@ -46,7 +37,7 @@ export async function renderioApiRequest(
 
 	return await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		credentialType,
+		'renderioApi',
 		options,
 	);
 }

@@ -45,12 +45,11 @@ describe('Renderio Node', () => {
 			expect(renderioNode.description.properties.length).toBeGreaterThan(0);
 		});
 
-		it('should have both credential types defined', () => {
+		it('should have API key credential type defined', () => {
 			expect(renderioNode.description.credentials).toBeDefined();
 			expect(renderioNode.description.credentials).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({ name: 'renderioApi' }),
-					expect.objectContaining({ name: 'renderioOAuth2Api' }),
 				]),
 			);
 		});

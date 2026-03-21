@@ -113,15 +113,8 @@ export async function executeFileOperation(
 		const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
 		const dataBuffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
 
-		const authType = this.getNodeParameter('authentication', 0) as string;
-		const credentialType = authType === 'oAuth2' ? 'renderioOAuth2Api' : 'renderioApi';
-		let baseUrl: string;
-		if (authType === 'oAuth2') {
-			baseUrl = 'https://renderio.dev';
-		} else {
-			const credentials = await this.getCredentials('renderioApi');
-			baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
-		}
+		const credentials = await this.getCredentials('renderioApi');
+		const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
 
 		try {
 			const formData = new FormData();
@@ -130,7 +123,7 @@ export async function executeFileOperation(
 
 			responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				credentialType,
+				'renderioApi',
 				{
 					method: 'POST',
 					url: `${baseUrl}/api/v1/files/upload`,

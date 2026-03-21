@@ -149,22 +149,13 @@ For example, you can process media files using FFmpeg commands and then use an A
 
 ## Credentials
 
-The node supports two authentication methods:
+To authenticate with RenderIO:
 
-1. **OAuth2 authentication** (Recommended)
-   - Sign up or log in at [RenderIO](https://renderio.dev)
-   - Navigate to the **Dashboard** and open the **OAuth2 Applications** section
-   - Create a new OAuth2 application. Copy the **Client ID** and **Client Secret**
-   - In n8n, create a new **RenderIO OAuth2 API** credential
-   - Paste the **Client ID** and **Client Secret** into the corresponding fields
-   - Click **Connect** to complete the OAuth2 authorization flow
-
-2. **API Key authentication**
-   - Sign up or log in at [RenderIO](https://renderio.dev)
-   - Navigate to the **Dashboard** and open the **API Keys** section
-   - Generate a new API key. Keys start with `ffsk_`
-   - In n8n, create a new **RenderIO API** credential
-   - Paste the key into the **API Key** field
+1. Sign up or log in at [RenderIO](https://renderio.dev)
+2. Navigate to the **Dashboard** and open the **API Keys** section
+3. Generate a new API key. Keys start with `ffsk_`
+4. In n8n, create a new **RenderIO API** credential
+5. Paste the key into the **API Key** field
 
 For more details, see the [authentication documentation](https://renderio.dev/docs/getting-started/authentication).
 
@@ -199,7 +190,6 @@ Track changes and updates to the node here.
 
 1. **Authentication errors**
    - Verify your API key is correct and starts with `ffsk_`
-   - For OAuth2, ensure the Client ID and Client Secret match your RenderIO dashboard
    - Check that your RenderIO account is active
 
 2. **Command failures**

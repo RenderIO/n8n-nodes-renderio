@@ -2,10 +2,7 @@
 	"node": "n8n-nodes-renderio.renderio",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Development", "Miscellaneous", "Videos"],
-	"subcategories": {
-		"Development": ["Other"]
-	},
+	"categories": ["Development", "Miscellaneous", "Utility"],
 	"resources": {
 		"credentialDocumentation": [
 			{
