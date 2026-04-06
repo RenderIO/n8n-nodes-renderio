@@ -31,7 +31,7 @@ jobs:
 
       - name: Run tests
         run: npm run test
-      
+
       - name: Configure Git
         run: |
           git config --global user.name "RenderIO Release Bot"
@@ -68,7 +68,5 @@ jobs:
             echo "Version ${{ env.VERSION }} of n8n-nodes-renderio is already published to npm. Skipping publish step."
           else
             echo "Publishing n8n-nodes-renderio@${{ env.VERSION }} to npm..."
-            npm publish --access public
+            npm publish --access public --provenance
           fi
-        env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
