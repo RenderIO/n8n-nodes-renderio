@@ -64,10 +64,10 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if npm view @renderio/n8n-nodes-renderio@${{ env.VERSION }} version > /dev/null 2>&1; then
-            echo "Version ${{ env.VERSION }} of @renderio/n8n-nodes-renderio is already published to npm. Skipping publish step."
+          if npm view n8n-nodes-renderio@${{ env.VERSION }} version > /dev/null 2>&1; then
+            echo "Version ${{ env.VERSION }} of n8n-nodes-renderio is already published to npm. Skipping publish step."
           else
-            echo "Publishing @renderio/n8n-nodes-renderio@${{ env.VERSION }} to npm..."
+            echo "Publishing n8n-nodes-renderio@${{ env.VERSION }} to npm..."
             npm publish --access public
           fi
         env:
