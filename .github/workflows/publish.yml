@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js & cache npm
         uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
           cache: npm
 
@@ -70,5 +70,3 @@ jobs:
             echo "Publishing n8n-nodes-renderio@${{ env.VERSION }} to npm..."
             npm publish --access public --provenance
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
