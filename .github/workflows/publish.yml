@@ -70,3 +70,5 @@ jobs:
             echo "Publishing n8n-nodes-renderio@${{ env.VERSION }} to npm..."
             npm publish --access public --provenance
           fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
