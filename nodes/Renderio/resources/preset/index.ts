@@ -139,10 +139,13 @@ export const presetFields: INodeProperties[] = [
 					{
 						displayName: 'Key',
 						name: 'key',
-						type: 'string',
-						default: 'in_video',
-						placeholder: 'e.g. in_video',
-						description: 'The input file key (must match a key defined in the preset)',
+						type: 'options',
+						typeOptions: {
+							loadOptionsMethod: 'getPresetInputKeys',
+							loadOptionsDependsOn: ['presetId'],
+						},
+						default: '',
+						description: 'The input file key (loaded from the selected preset)',
 					},
 					{
 						displayName: 'URL',

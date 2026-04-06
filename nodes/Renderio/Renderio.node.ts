@@ -3,6 +3,7 @@ import type {
 	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodeListSearchResult,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 	IDataObject,
@@ -89,11 +90,11 @@ export class Renderio implements INodeType {
 					{ limit: 100 },
 				);
 
-				const presets = (response.data as IDataObject[] | undefined) ?? [];
+				const presets = (response.presets as IDataObject[] | undefined) ?? [];
 
 				let results = presets.map((preset) => ({
-					name: (preset.name as string) || (preset.id as string),
-					value: preset.id as string,
+					name: (preset.name as string) || (preset.preset_id as string),
+					value: preset.preset_id as string,
 				}));
 
 				if (filter) {
@@ -104,6 +105,38 @@ export class Renderio implements INodeType {
 				}
 
 				return { results };
+			},
+		},
+		loadOptions: {
+			async getPresetInputKeys(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const presetId = this.getCurrentNodeParameter('presetId') as
+					| { value?: string }
+					| string
+					| undefined;
+
+				const id = typeof presetId === 'string' ? presetId : presetId?.value;
+
+				if (!id) {
+					return [];
+				}
+
+				try {
+					const preset = await renderioApiRequest.call(
+						this,
+						'GET',
+						`/api/v1/presets/${id}`,
+					);
+
+					const inputFileKeys = (preset.input_file_keys as string[]) ?? [];
+					return inputFileKeys.map((key) => ({
+						name: key,
+						value: key,
+					}));
+				} catch {
+					return [];
+				}
 			},
 		},
 	};

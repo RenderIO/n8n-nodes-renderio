@@ -269,7 +269,10 @@ describe('Renderio Node', () => {
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
-			expect(getTaskData(nodeResult)).toEqual(mockPresets);
+
+			const data = getTaskArrayData(nodeResult);
+			expect(Array.isArray(data)).toBe(true);
+			expect(data?.map((item: { json: any }) => item.json)).toEqual(mockPresets.presets);
 			expect(scope.isDone()).toBe(true);
 		});
 

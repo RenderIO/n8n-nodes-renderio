@@ -119,13 +119,19 @@ export async function executePresetOperation(
 		}
 
 		try {
-			responseData = await renderioApiRequest.call(
+			const response = await renderioApiRequest.call(
 				this,
 				'GET',
 				'/api/v1/presets',
 				undefined,
 				qs,
 			) as IDataObject;
+
+			const presets = (response.presets ?? []) as JsonObject[];
+			return presets.map((preset) => ({
+				json: preset,
+				pairedItem: { item: i },
+			}));
 		} catch (error) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Could not retrieve presets',

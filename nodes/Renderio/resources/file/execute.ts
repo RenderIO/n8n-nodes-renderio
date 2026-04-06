@@ -128,6 +128,9 @@ export async function executeFileOperation(
 					method: 'POST',
 					url: `${baseUrl}/api/v1/files/upload`,
 					body: formData,
+					headers: {
+						'User-Agent': 'n8n-nodes-renderio',
+					},
 				},
 			);
 		} catch (e) {

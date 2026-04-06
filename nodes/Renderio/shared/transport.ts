@@ -25,6 +25,9 @@ export async function renderioApiRequest(
 		method,
 		url: `${baseUrl}${endpoint}`,
 		json: true,
+		headers: {
+			'User-Agent': 'n8n-nodes-renderio',
+		},
 	};
 
 	if (qs && Object.keys(qs).length > 0) {
