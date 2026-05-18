@@ -1,0 +1,30 @@
+{
+	"nodes": [
+		{
+			"name": "Download and process media",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "command",
+				"operation": "downloadAndProcessMedia",
+				"mediaUrls": {
+					"urlValues": [
+						{ "key": "in_1", "value": "https://www.instagram.com/reel/abc123/" }
+					]
+				},
+				"outputFiles": {
+					"fileValues": [
+						{ "key": "out_1", "value": "clip.mp4" }
+					]
+				},
+				"ffmpegCommand": "-i {{in_1}} -t 10 -c copy {{out_1}}",
+				"metadata": {
+					"metadataValues": [
+						{ "key": "source", "value": "instagram" }
+					]
+				}
+			}
+		}
+	]
+}

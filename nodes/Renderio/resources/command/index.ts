@@ -19,13 +19,28 @@ const showOnlyForRunMultiple = {
 	resource: ['command'],
 };
 
+const showOnlyForDownloadMedia = {
+	operation: ['downloadMedia'],
+	resource: ['command'],
+};
+
+const showOnlyForDownloadAndProcessMedia = {
+	operation: ['downloadAndProcessMedia'],
+	resource: ['command'],
+};
+
 const showOnlyForGet = {
 	operation: ['get'],
 	resource: ['command'],
 };
 
 const showForRunOrChained = {
-	operation: ['run', 'runChained'],
+	operation: ['run', 'runChained', 'downloadMedia', 'downloadAndProcessMedia'],
+	resource: ['command'],
+};
+
+const showForRunOrDownloadAndProcessMedia = {
+	operation: ['run', 'downloadAndProcessMedia'],
 	resource: ['command'],
 };
 
@@ -105,6 +120,43 @@ const outputFilesField: INodeProperties = {
 	],
 };
 
+const mediaUrlsField: INodeProperties = {
+	displayName: 'Media URLs',
+	name: 'mediaUrls',
+	type: 'fixedCollection',
+	typeOptions: {
+		multipleValues: true,
+	},
+	placeholder: 'Add Media URL',
+	default: {},
+	required: true,
+	description: 'Media URLs to download with yt-dlp. Keys must start with "in_" and can be used as FFmpeg placeholders when processing.',
+	options: [
+		{
+			name: 'urlValues',
+			displayName: 'Media URL',
+			values: [
+				{
+					displayName: 'Key',
+					name: 'key',
+					type: 'string',
+					default: 'in_1',
+					placeholder: 'e.g. in_1',
+					description: 'The placeholder key for this downloaded media file (must start with "in_")',
+				},
+				{
+					displayName: 'URL',
+					name: 'value',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. https://www.youtube.com/watch?v=...',
+					description: 'The media URL to download. YouTube, Instagram, TikTok, and other yt-dlp-supported sites may work.',
+				},
+			],
+		},
+	],
+};
+
 export const commandOperations: INodeProperties = {
 	displayName: 'Operation',
 	name: 'operation',
@@ -114,6 +166,18 @@ export const commandOperations: INodeProperties = {
 		show: showOnlyForCommand,
 	},
 	options: [
+		{
+			name: 'Download and Process Media',
+			value: 'downloadAndProcessMedia',
+			action: 'Download and process media',
+			description: 'Download media with yt-dlp and process it with an FFmpeg command',
+		},
+		{
+			name: 'Download Media',
+			value: 'downloadMedia',
+			action: 'Download media',
+			description: 'Download media from YouTube, Instagram, TikTok, and other yt-dlp-supported URLs',
+		},
 		{
 			name: 'Get',
 			value: 'get',
@@ -180,7 +244,7 @@ export const commandFields: INodeProperties[] = [
 		type: 'notice',
 		default: '',
 		displayOptions: {
-			show: showOnlyForRun,
+			show: showForRunOrDownloadAndProcessMedia,
 		},
 	},
 	{
@@ -194,9 +258,35 @@ export const commandFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-		description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/output file keys.',
+		description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/media URL and output file keys.',
 		displayOptions: {
-			show: showOnlyForRun,
+			show: showForRunOrDownloadAndProcessMedia,
+		},
+	},
+
+	// ===========================================
+	// Download Media fields
+	// ===========================================
+	{
+		...mediaUrlsField,
+		displayOptions: {
+			show: showOnlyForDownloadMedia,
+		},
+	},
+
+	// ===========================================
+	// Download and Process Media fields
+	// ===========================================
+	{
+		...mediaUrlsField,
+		displayOptions: {
+			show: showOnlyForDownloadAndProcessMedia,
+		},
+	},
+	{
+		...outputFilesField,
+		displayOptions: {
+			show: showOnlyForDownloadAndProcessMedia,
 		},
 	},
 

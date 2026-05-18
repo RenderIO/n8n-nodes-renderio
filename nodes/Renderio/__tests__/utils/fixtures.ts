@@ -44,6 +44,14 @@ export const runMultipleResult = () => ({
 	],
 });
 
+export const ytdlpDownloadResult = () => ({
+	command_id: 'cmd-ytdlp-download-001',
+});
+
+export const ytdlpCommandResult = () => ({
+	command_id: 'cmd-ytdlp-command-001',
+});
+
 export const getFileResult = () => ({
 	file_id: 'file-550e8400-e29b-41d4-a716-446655440000',
 	storage_url: 'https://renderio.dev/api/media/outputs/abc123/video.mp4',

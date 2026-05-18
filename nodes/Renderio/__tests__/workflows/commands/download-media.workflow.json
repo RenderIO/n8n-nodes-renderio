@@ -1,0 +1,25 @@
+{
+	"nodes": [
+		{
+			"name": "Download media",
+			"type": "n8n-nodes-renderio.renderio",
+			"typeVersion": 1,
+			"parameters": {
+				"authentication": "apiKey",
+				"resource": "command",
+				"operation": "downloadMedia",
+				"mediaUrls": {
+					"urlValues": [
+						{ "key": "in_1", "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+						{ "key": "in_2", "value": "https://vm.tiktok.com/ZGdHeRRNL/" }
+					]
+				},
+				"metadata": {
+					"metadataValues": [
+						{ "key": "source", "value": "n8n" }
+					]
+				}
+			}
+		}
+	]
+}

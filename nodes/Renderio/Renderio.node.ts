@@ -32,7 +32,7 @@ export class Renderio implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Run FFmpeg commands in the cloud with RenderIO',
+		description: 'Run FFmpeg commands and download web media in the cloud with RenderIO',
 		defaults: {
 			name: 'RenderIO',
 		},

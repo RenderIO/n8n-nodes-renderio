@@ -9,6 +9,8 @@ import getCommandWorkflow from './workflows/commands/get-command.workflow.json';
 import runCommandWorkflow from './workflows/commands/run-command.workflow.json';
 import runChainedWorkflow from './workflows/commands/run-chained.workflow.json';
 import runMultipleWorkflow from './workflows/commands/run-multiple.workflow.json';
+import downloadMediaWorkflow from './workflows/commands/download-media.workflow.json';
+import downloadAndProcessMediaWorkflow from './workflows/commands/download-and-process-media.workflow.json';
 import getFileWorkflow from './workflows/files/get-file.workflow.json';
 import getFilesWorkflow from './workflows/files/get-files.workflow.json';
 import storeFileWorkflow from './workflows/files/store-file.workflow.json';
@@ -134,6 +136,57 @@ describe('Renderio Node', () => {
 			});
 
 			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run multiple');
+			expect(nodeResults.length).toBe(1);
+			const [nodeResult] = nodeResults;
+			expect(nodeResult.executionStatus).toBe('success');
+			expect(getTaskData(nodeResult)).toEqual(mockResult);
+			expect(scope.isDone()).toBe(true);
+		});
+
+		it('should download media with yt-dlp', async () => {
+			const mockResult = fixtures.ytdlpDownloadResult();
+
+			const scope = nock('https://renderio.dev')
+				.post('/api/v1/ytdlp-download', {
+					input_urls: {
+						in_1: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+						in_2: 'https://vm.tiktok.com/ZGdHeRRNL/',
+					},
+					metadata: { source: 'n8n' },
+				})
+				.reply(200, mockResult);
+
+			const { executionData } = await executeWorkflow({
+				credentialsHelper,
+				workflow: downloadMediaWorkflow,
+			});
+
+			const nodeResults = getRunTaskDataByNodeName(executionData, 'Download media');
+			expect(nodeResults.length).toBe(1);
+			const [nodeResult] = nodeResults;
+			expect(nodeResult.executionStatus).toBe('success');
+			expect(getTaskData(nodeResult)).toEqual(mockResult);
+			expect(scope.isDone()).toBe(true);
+		});
+
+		it('should download and process media with yt-dlp and FFmpeg', async () => {
+			const mockResult = fixtures.ytdlpCommandResult();
+
+			const scope = nock('https://renderio.dev')
+				.post('/api/v1/run-ytdlp-command', {
+					input_urls: { in_1: 'https://www.instagram.com/reel/abc123/' },
+					output_files: { out_1: 'clip.mp4' },
+					ffmpeg_command: '-i {{in_1}} -t 10 -c copy {{out_1}}',
+					metadata: { source: 'instagram' },
+				})
+				.reply(200, mockResult);
+
+			const { executionData } = await executeWorkflow({
+				credentialsHelper,
+				workflow: downloadAndProcessMediaWorkflow,
+			});
+
+			const nodeResults = getRunTaskDataByNodeName(executionData, 'Download and process media');
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');

@@ -28,6 +28,24 @@ function buildFileMap(
 	return result;
 }
 
+function buildMediaUrlMap(
+	context: IExecuteFunctions,
+	paramName: string,
+	i: number,
+): Record<string, string> {
+	const urlsData = context.getNodeParameter(paramName, i, {}) as IDataObject;
+	const urlEntries = (urlsData.urlValues as IDataObject[] | undefined) ?? [];
+	const result: Record<string, string> = {};
+	for (const entry of urlEntries) {
+		const key = entry.key as string;
+		const value = entry.value as string;
+		if (key && value) {
+			result[key] = value;
+		}
+	}
+	return result;
+}
+
 /**
  * Build the metadata object from the top-level metadata fixedCollection.
  */
@@ -63,6 +81,22 @@ function buildCommonBody(
 	const body: IDataObject = {
 		input_files: inputFiles,
 		output_files: outputFiles,
+	};
+
+	const metadata = buildMetadata(context, i);
+	if (metadata) {
+		body.metadata = metadata;
+	}
+
+	return body;
+}
+
+function buildYtDlpBody(
+	context: IExecuteFunctions,
+	i: number,
+): IDataObject {
+	const body: IDataObject = {
+		input_urls: buildMediaUrlMap(context, 'mediaUrls', i),
 	};
 
 	const metadata = buildMetadata(context, i);
@@ -201,6 +235,40 @@ export async function executeCommandOperation(
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Could not run multiple FFmpeg commands',
 				description: 'Check that each command has valid input files and FFmpeg syntax.',
+			});
+		}
+	} else if (operation === 'downloadMedia') {
+		const body = buildYtDlpBody(this, i);
+
+		try {
+			responseData = await renderioApiRequest.call(
+				this,
+				'POST',
+				'/api/v1/ytdlp-download',
+				body,
+			) as IDataObject;
+		} catch (error) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Could not download media',
+				description: 'Check that your media URLs are accessible and supported by yt-dlp.',
+			});
+		}
+	} else if (operation === 'downloadAndProcessMedia') {
+		const body = buildYtDlpBody(this, i);
+		body.output_files = buildFileMap(this, 'outputFiles', i);
+		body.ffmpeg_command = this.getNodeParameter('ffmpegCommand', i) as string;
+
+		try {
+			responseData = await renderioApiRequest.call(
+				this,
+				'POST',
+				'/api/v1/run-ytdlp-command',
+				body,
+			) as IDataObject;
+		} catch (error) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Could not download and process media',
+				description: 'Check that your media URLs are supported by yt-dlp and the FFmpeg command syntax is valid.',
 			});
 		}
 	} else {

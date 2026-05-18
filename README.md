@@ -1,6 +1,6 @@
 # n8n Nodes - RenderIO integration
 
-This is an n8n community node that integrates [RenderIO](https://renderio.dev) with your n8n workflows, so you can run FFmpeg commands in the cloud, manage media files, and automate video/audio processing tasks.
+This is an n8n community node that integrates [RenderIO](https://renderio.dev) with your n8n workflows, so you can run FFmpeg commands in the cloud, download web media with yt-dlp, manage media files, and automate video/audio processing tasks.
 
 [RenderIO](https://renderio.dev) is an FFmpeg-as-a-Service cloud API that lets you submit FFmpeg commands via API, get results stored in the cloud, and integrate media processing into your automation workflows, while [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) tool for AI workflow automation that allows you to connect various services.
 
@@ -111,6 +111,12 @@ This node supports a wide range of RenderIO operations, organized by resource ty
 - **Run Multiple**: Execute multiple independent FFmpeg commands in parallel
   - Process multiple files simultaneously
   - Each command runs independently
+- **Download Media**: Download media with yt-dlp
+  - Supports YouTube, Instagram, TikTok, and other yt-dlp-supported URLs
+  - Stores downloaded media as RenderIO output files
+- **Download and Process Media**: Download media with yt-dlp and process it with FFmpeg
+  - Use downloaded media as `{{in_key}}` placeholders in an FFmpeg command
+  - Create transformed outputs such as clips, GIFs, resized videos, or extracted audio
 - **Get**: Retrieve a command by ID
   - Check processing status (queued, processing, completed, failed)
   - Access output file references and metadata
@@ -168,9 +174,10 @@ For more details, see the [authentication documentation](https://renderio.dev/do
 ## Usage
 
 1. **Store or upload media**: Use **File > Store** to import a media file from a URL, or **File > Upload** to upload a binary file directly.
-2. **Run an FFmpeg command**: Use **Command > Run** to execute an FFmpeg command on the stored file (e.g., transcode, resize, extract audio).
-3. **Check status**: Use **Command > Get** to poll for processing completion.
-4. **Retrieve results**: Use **File > Get** to access the output file.
+2. **Download web media**: Use **Command > Download Media** for YouTube, Instagram, TikTok, and other yt-dlp-supported URLs.
+3. **Run an FFmpeg command**: Use **Command > Run** to execute an FFmpeg command on the stored file, or **Command > Download and Process Media** to download and transform web media in one job.
+4. **Check status**: Use **Command > Get** to poll for processing completion.
+5. **Retrieve results**: Use **File > Get** to access the output file.
 
 For repeated operations, create a **Preset** with your FFmpeg command template, then use **Preset > Execute** to run it with different input files.
 
