@@ -30,9 +30,17 @@ export class Renderio implements INodeType {
 		name: 'renderio',
 		icon: { light: 'file:renderio.svg', dark: 'file:renderio.dark.svg' },
 		group: ['transform'],
-		version: 1,
+		version: [1, 2],
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Run FFmpeg commands and download web media in the cloud with RenderIO',
+		hints: [
+			{
+				message: 'RenderIO command fields in node version 2 use <b>&lt;&lt;alias&gt;&gt;</b> placeholders so <b>{{ ... }}</b> remains available for n8n expressions. Existing version 1 workflows keep the legacy <b>{{alias}}</b> syntax.',
+				type: 'info',
+				location: 'ndv',
+				displayCondition: '={{ $parameter["resource"] === "command" }}',
+			},
+		],
 		defaults: {
 			name: 'RenderIO',
 		},

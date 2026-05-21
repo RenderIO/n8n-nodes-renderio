@@ -59,6 +59,24 @@ describe('Renderio Node', () => {
 		it('should be usable as a tool', () => {
 			expect(renderioNode.description.usableAsTool).toBe(true);
 		});
+
+		it('should expose legacy and expression-enabled node versions', () => {
+			expect(renderioNode.description.version).toEqual([1, 2]);
+
+			const commandFields = renderioNode.description.properties.filter(
+				(property) => property.name === 'ffmpegCommand',
+			);
+			const legacyField = commandFields.find((property) =>
+				(property.displayOptions?.show?.['@version'] as number[] | undefined)?.includes(1),
+			);
+			const expressionField = commandFields.find((property) =>
+				(property.displayOptions?.show?.['@version'] as number[] | undefined)?.includes(2),
+			);
+
+			expect(legacyField?.noDataExpression).toBe(true);
+			expect(expressionField?.noDataExpression).toBeUndefined();
+			expect(expressionField?.placeholder).toContain('<<in_video>>');
+		});
 	});
 
 	describe('commands', () => {
@@ -101,6 +119,88 @@ describe('Renderio Node', () => {
 			expect(nodeResult.executionStatus).toBe('success');
 			expect(getTaskData(nodeResult)).toEqual(mockResult);
 			expect(scope.isDone()).toBe(true);
+		});
+
+		it('should run a version 2 FFmpeg command with <<alias>> placeholders', async () => {
+			const mockResult = fixtures.runCommandResult();
+			const workflow = {
+				nodes: [
+					{
+						name: 'Run command v2',
+						type: 'n8n-nodes-renderio.renderio',
+						typeVersion: 2,
+						parameters: {
+							authentication: 'apiKey',
+							resource: 'command',
+							operation: 'run',
+							inputFiles: {
+								fileValues: [
+									{ key: 'in_video', value: 'https://example.com/input.mp4' },
+								],
+							},
+							outputFiles: {
+								fileValues: [
+									{ key: 'out_video', value: 'output.mp4' },
+								],
+							},
+							ffmpegCommand: '-i <<in_video>> -c:v libx264 <<out_video>>',
+							metadata: {},
+						},
+					},
+				],
+			};
+
+			const scope = nock('https://renderio.dev')
+				.post('/api/v1/run-ffmpeg-command', {
+					input_files: { in_video: 'https://example.com/input.mp4' },
+					output_files: { out_video: 'output.mp4' },
+					ffmpeg_command: '-i <<in_video>> -c:v libx264 <<out_video>>',
+				})
+				.reply(200, mockResult);
+
+			const { executionData } = await executeWorkflow({
+				credentialsHelper,
+				workflow,
+			});
+
+			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run command v2');
+			expect(nodeResults.length).toBe(1);
+			const [nodeResult] = nodeResults;
+			expect(nodeResult.executionStatus).toBe('success');
+			expect(getTaskData(nodeResult)).toEqual(mockResult);
+			expect(scope.isDone()).toBe(true);
+		});
+
+		it('should reject legacy {{alias}} placeholders in version 2 command fields', async () => {
+			const workflow = {
+				nodes: [
+					{
+						name: 'Run command v2',
+						type: 'n8n-nodes-renderio.renderio',
+						typeVersion: 2,
+						parameters: {
+							authentication: 'apiKey',
+							resource: 'command',
+							operation: 'run',
+							inputFiles: {
+								fileValues: [
+									{ key: 'in_video', value: 'https://example.com/input.mp4' },
+								],
+							},
+							outputFiles: {
+								fileValues: [
+									{ key: 'out_video', value: 'output.mp4' },
+								],
+							},
+							ffmpegCommand: '-i {{in_video}} -c:v libx264 {{out_video}}',
+						},
+					},
+				],
+			};
+
+			await expect(
+				executeWorkflow({ credentialsHelper, workflow }),
+			).rejects.toThrow('Use <<alias>> placeholders in FFmpeg commands');
 		});
 
 		it('should run chained FFmpeg commands', async () => {

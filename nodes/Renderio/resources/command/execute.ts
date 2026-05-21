@@ -7,6 +7,30 @@ import type {
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import { renderioApiRequest } from '../../shared/transport';
 
+const LEGACY_ALIAS_PATTERN = /{{\s*([A-Za-z][A-Za-z0-9_]*)\s*}}/;
+
+function assertSupportedPlaceholderSyntax(
+	context: IExecuteFunctions,
+	command: string,
+	fieldName: string,
+	i: number,
+): void {
+	if ((context.getNode().typeVersion ?? 1) < 2) return;
+
+	const match = command.match(LEGACY_ALIAS_PATTERN);
+	if (!match) return;
+
+	const alias = match[1];
+	throw new NodeOperationError(
+		context.getNode(),
+		'Use <<alias>> placeholders in FFmpeg commands',
+		{
+			description: `Found "${match[0]}" in ${fieldName}. In node version 2, {{ ... }} is reserved for n8n expressions. Replace it with "<<${alias}>>".`,
+			itemIndex: i,
+		},
+	);
+}
+
 /**
  * Build the input_files or output_files object from a fixedCollection parameter.
  */
@@ -132,6 +156,7 @@ export async function executeCommandOperation(
 	} else if (operation === 'run') {
 		const body = buildCommonBody(this, i);
 		const ffmpegCommand = this.getNodeParameter('ffmpegCommand', i) as string;
+		assertSupportedPlaceholderSyntax(this, ffmpegCommand, 'FFmpeg Command', i);
 		body.ffmpeg_command = ffmpegCommand;
 
 		try {
@@ -166,6 +191,10 @@ export async function executeCommandOperation(
 			);
 		}
 
+		for (const ffmpegCommand of ffmpegCommands) {
+			assertSupportedPlaceholderSyntax(this, ffmpegCommand, 'FFmpeg Commands', i);
+		}
+
 		body.ffmpeg_commands = ffmpegCommands;
 
 		try {
@@ -198,6 +227,7 @@ export async function executeCommandOperation(
 
 		const commands = commandEntries.map((entry) => {
 			const ffmpegCommand = entry.ffmpegCommand as string;
+			assertSupportedPlaceholderSyntax(this, ffmpegCommand, 'Commands', i);
 
 			const inputFilesData = entry.inputFiles as IDataObject | undefined;
 			const inputFileEntries = (inputFilesData?.fileValues as IDataObject[] | undefined) ?? [];
@@ -256,7 +286,9 @@ export async function executeCommandOperation(
 	} else if (operation === 'downloadAndProcessMedia') {
 		const body = buildYtDlpBody(this, i);
 		body.output_files = buildFileMap(this, 'outputFiles', i);
-		body.ffmpeg_command = this.getNodeParameter('ffmpegCommand', i) as string;
+		const ffmpegCommand = this.getNodeParameter('ffmpegCommand', i) as string;
+		assertSupportedPlaceholderSyntax(this, ffmpegCommand, 'FFmpeg Command', i);
+		body.ffmpeg_command = ffmpegCommand;
 
 		try {
 			responseData = await renderioApiRequest.call(

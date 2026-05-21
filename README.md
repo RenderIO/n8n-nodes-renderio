@@ -13,6 +13,7 @@ This is an n8n community node that integrates [RenderIO](https://renderio.dev) w
 - [Credentials](#credentials)
 - [Compatibility](#compatibility)
 - [Usage](#usage)
+- [Placeholder syntax](#placeholder-syntax)
 - [Resources](#resources)
 - [Release](#releasing-a-new-version)
 - [Version History](#version-history)
@@ -115,7 +116,7 @@ This node supports a wide range of RenderIO operations, organized by resource ty
   - Supports YouTube, Instagram, TikTok, and other yt-dlp-supported URLs
   - Stores downloaded media as RenderIO output files
 - **Download and Process Media**: Download media with yt-dlp and process it with FFmpeg
-  - Use downloaded media as `{{in_key}}` placeholders in an FFmpeg command
+  - Use downloaded media as `<<in_key>>` placeholders in an FFmpeg command
   - Create transformed outputs such as clips, GIFs, resized videos, or extracted audio
 - **Get**: Retrieve a command by ID
   - Check processing status (queued, processing, completed, failed)
@@ -170,6 +171,8 @@ For more details, see the [authentication documentation](https://renderio.dev/do
 - **n8n**: Version 1.60.0 and higher
 - **Node.js**: 22.x or higher
 - **npm**: 10.8.2 or higher
+- **RenderIO node v1 workflows**: Existing saved workflows keep using legacy `{{alias}}` RenderIO placeholders, with n8n expressions disabled in FFmpeg command fields
+- **RenderIO node v2 workflows**: New workflows use `<<alias>>` RenderIO placeholders, allowing `{{ ... }}` to be used for n8n expressions in FFmpeg command fields
 
 ## Usage
 
@@ -180,6 +183,21 @@ For more details, see the [authentication documentation](https://renderio.dev/do
 5. **Retrieve results**: Use **File > Get** to access the output file.
 
 For repeated operations, create a **Preset** with your FFmpeg command template, then use **Preset > Execute** to run it with different input files.
+
+## Placeholder syntax
+
+RenderIO command fields support two syntax modes through n8n node versioning:
+
+- **Version 1 (legacy)**: Use `{{in_video}}` and `{{out_video}}`. n8n expressions are intentionally disabled in FFmpeg command fields to avoid conflicts with RenderIO placeholders. Existing production workflows stay on this version.
+- **Version 2 (current)**: Use `<<in_video>>` and `<<out_video>>` for RenderIO placeholders. The `{{ ... }}` syntax is available for n8n expressions.
+
+Version 2 example:
+
+```text
+-i <<in_video>> -metadata title="{{ $json.title }}" -c:v libx264 <<out_video>>
+```
+
+If a version 2 command still contains a raw legacy placeholder such as `{{in_video}}`, the node rejects it and asks you to replace it with `<<in_video>>`.
 
 ## Resources
 
@@ -202,6 +220,7 @@ Track changes and updates to the node here.
 2. **Command failures**
    - Verify the FFmpeg arguments are valid
    - Check that input files exist and are accessible
+   - In node version 2, use `<<alias>>` for RenderIO placeholders and reserve `{{ ... }}` for n8n expressions
    - Review the command status via **Command > Get** for detailed error messages
 
 3. **File upload issues**

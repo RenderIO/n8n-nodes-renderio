@@ -44,6 +44,11 @@ const showForRunOrDownloadAndProcessMedia = {
 	resource: ['command'],
 };
 
+const showForVersion = (show: Record<string, string[]>, version: number) => ({
+	...show,
+	'@version': [version],
+});
+
 // Shared field definitions reused across run and runChained operations.
 
 const inputFilesField: INodeProperties = {
@@ -239,12 +244,21 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'The FFmpeg command field does not support n8n expressions because RenderIO uses the same {{placeholder}} syntax. To use dynamic values, set expressions on the Input/Output File URL fields above instead.',
-		name: 'ffmpegCommandNotice',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. This field does not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		name: 'ffmpegCommandLegacyNotice',
 		type: 'notice',
 		default: '',
 		displayOptions: {
-			show: showForRunOrDownloadAndProcessMedia,
+			show: showForVersion(showForRunOrDownloadAndProcessMedia, 1),
+		},
+	},
+	{
+		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		name: 'ffmpegCommandExpressionNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: showForVersion(showForRunOrDownloadAndProcessMedia, 2),
 		},
 	},
 	{
@@ -258,9 +272,24 @@ export const commandFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-		description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/media URL and output file keys.',
+		description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/media URL and output file keys. This is the legacy syntax for existing workflows.',
 		displayOptions: {
-			show: showForRunOrDownloadAndProcessMedia,
+			show: showForVersion(showForRunOrDownloadAndProcessMedia, 1),
+		},
+	},
+	{
+		displayName: 'FFmpeg Command',
+		name: 'ffmpegCommand',
+		type: 'string',
+		typeOptions: {
+			rows: 3,
+		},
+		required: true,
+		default: '',
+		placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
+		description: 'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
+		displayOptions: {
+			show: showForVersion(showForRunOrDownloadAndProcessMedia, 2),
 		},
 	},
 
@@ -306,12 +335,21 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'The FFmpeg command fields do not support n8n expressions because RenderIO uses the same {{placeholder}} syntax. To use dynamic values, set expressions on the Input/Output File fields above instead.',
-		name: 'ffmpegCommandsNotice',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		name: 'ffmpegCommandsLegacyNotice',
 		type: 'notice',
 		default: '',
 		displayOptions: {
-			show: showOnlyForRunChained,
+			show: showForVersion(showOnlyForRunChained, 1),
+		},
+	},
+	{
+		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		name: 'ffmpegCommandsExpressionNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: showForVersion(showOnlyForRunChained, 2),
 		},
 	},
 	{
@@ -326,7 +364,7 @@ export const commandFields: INodeProperties[] = [
 		default: {},
 		description: 'A list of FFmpeg commands to execute sequentially (max 10)',
 		displayOptions: {
-			show: showOnlyForRunChained,
+			show: showForVersion(showOnlyForRunChained, 1),
 		},
 		options: [
 			{
@@ -343,7 +381,41 @@ export const commandFields: INodeProperties[] = [
 						noDataExpression: true,
 						default: '',
 						placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-						description: 'An FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/output file keys.',
+						description: 'An FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/output file keys. This is the legacy syntax for existing workflows.',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'FFmpeg Commands',
+		name: 'ffmpegCommands',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add FFmpeg Command',
+		required: true,
+		default: {},
+		description: 'A list of FFmpeg commands to execute sequentially (max 10)',
+		displayOptions: {
+			show: showForVersion(showOnlyForRunChained, 2),
+		},
+		options: [
+			{
+				name: 'commandValues',
+				displayName: 'Command',
+				values: [
+					{
+						displayName: 'Command',
+						name: 'command',
+						type: 'string',
+						typeOptions: {
+							rows: 2,
+						},
+						default: '',
+						placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
+						description: 'An FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
 					},
 				],
 			},
@@ -394,12 +466,21 @@ export const commandFields: INodeProperties[] = [
 	// Run Multiple FFmpeg Commands fields
 	// ===========================================
 	{
-		displayName: 'The FFmpeg command fields do not support n8n expressions because RenderIO uses the same {{placeholder}} syntax. To use dynamic values, set expressions on the Input/Output File fields within each command instead.',
-		name: 'runMultipleNotice',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		name: 'runMultipleLegacyNotice',
 		type: 'notice',
 		default: '',
 		displayOptions: {
-			show: showOnlyForRunMultiple,
+			show: showForVersion(showOnlyForRunMultiple, 1),
+		},
+	},
+	{
+		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		name: 'runMultipleExpressionNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: showForVersion(showOnlyForRunMultiple, 2),
 		},
 	},
 	{
@@ -414,7 +495,7 @@ export const commandFields: INodeProperties[] = [
 		default: {},
 		description: 'A list of independent FFmpeg commands to execute (max 10)',
 		displayOptions: {
-			show: showOnlyForRunMultiple,
+			show: showForVersion(showOnlyForRunMultiple, 1),
 		},
 		options: [
 			{
@@ -432,7 +513,112 @@ export const commandFields: INodeProperties[] = [
 						required: true,
 						default: '',
 						placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-						description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders.',
+						description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders. This is the legacy syntax for existing workflows.',
+					},
+					{
+						displayName: 'Input Files',
+						name: 'inputFiles',
+						type: 'fixedCollection',
+						typeOptions: {
+							multipleValues: true,
+						},
+						placeholder: 'Add Input File',
+						default: {},
+						description: 'Input files for this command. Keys must start with "in_".',
+						options: [
+							{
+								name: 'fileValues',
+								displayName: 'Input File',
+								values: [
+									{
+										displayName: 'Key',
+										name: 'key',
+										type: 'string',
+										default: 'in_video',
+										placeholder: 'e.g. in_video',
+										description: 'Placeholder key used in the FFmpeg command (must start with "in_")',
+									},
+									{
+										displayName: 'URL',
+										name: 'value',
+										type: 'string',
+										default: '',
+										placeholder: 'e.g. https://example.com/video.mp4',
+										description: 'The URL of the input file',
+									},
+								],
+							},
+						],
+					},
+					{
+						displayName: 'Output Files',
+						name: 'outputFiles',
+						type: 'fixedCollection',
+						typeOptions: {
+							multipleValues: true,
+						},
+						placeholder: 'Add Output File',
+						default: {},
+						description: 'Output files for this command. Keys must start with "out_".',
+						options: [
+							{
+								name: 'fileValues',
+								displayName: 'Output File',
+								values: [
+									{
+										displayName: 'Key',
+										name: 'key',
+										type: 'string',
+										default: 'out_video',
+										placeholder: 'e.g. out_video',
+										description: 'Placeholder key used in the FFmpeg command (must start with "out_")',
+									},
+									{
+										displayName: 'Filename',
+										name: 'value',
+										type: 'string',
+										default: '',
+										placeholder: 'e.g. output.mp4',
+										description: 'The output filename',
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Commands',
+		name: 'commands',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Command',
+		required: true,
+		default: {},
+		description: 'A list of independent FFmpeg commands to execute (max 10)',
+		displayOptions: {
+			show: showForVersion(showOnlyForRunMultiple, 2),
+		},
+		options: [
+			{
+				name: 'commandValues',
+				displayName: 'Command',
+				values: [
+					{
+						displayName: 'FFmpeg Command',
+						name: 'ffmpegCommand',
+						type: 'string',
+						typeOptions: {
+							rows: 2,
+						},
+						required: true,
+						default: '',
+						placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
+						description: 'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
 					},
 					{
 						displayName: 'Input Files',
