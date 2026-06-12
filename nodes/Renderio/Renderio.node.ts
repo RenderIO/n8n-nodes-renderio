@@ -9,10 +9,7 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 
-import {
-	NodeConnectionTypes,
-	NodeOperationError,
-} from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import { renderioApiRequest } from './shared/transport';
 
@@ -31,11 +28,14 @@ export class Renderio implements INodeType {
 		icon: { light: 'file:renderio.svg', dark: 'file:renderio.dark.svg' },
 		group: ['transform'],
 		version: [1, 2],
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Run FFmpeg commands and download web media in the cloud with RenderIO',
+		subtitle:
+			'={{({ command: "Custom FFmpeg Command", file: "RenderIO File Storage", preset: "Preset Workflow" }[$parameter["resource"]] || $parameter["resource"]) + ": " + ({ downloadAndProcessMedia: "Download and Process Media", downloadMedia: "Download Media", get: $parameter["resource"] === "command" ? "Get Command Status" : "Get", run: "Run FFmpeg Command", runChained: "Run Chained FFmpeg Commands", runMultiple: "Run Multiple FFmpeg Commands", store: "Store", upload: "Upload", getMany: "Get Many", delete: "Delete", execute: "Execute" }[$parameter["operation"]] || $parameter["operation"])}}',
+		description:
+			'Process video and audio with FFmpeg, download media with yt-dlp, and store outputs in RenderIO',
 		hints: [
 			{
-				message: 'RenderIO command fields in node version 2 use <b>&lt;&lt;alias&gt;&gt;</b> placeholders so <b>{{ ... }}</b> remains available for n8n expressions. Existing version 1 workflows keep the legacy <b>{{alias}}</b> syntax.',
+				message:
+					'RenderIO command fields in node version 2 use <b>&lt;&lt;alias&gt;&gt;</b> placeholders so <b>{{ ... }}</b> remains available for n8n expressions. Existing version 1 workflows keep the legacy <b>{{alias}}</b> syntax.',
 				type: 'info',
 				location: 'ndv',
 				displayCondition: '={{ $parameter["resource"] === "command" }}',
@@ -61,19 +61,23 @@ export class Renderio implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Command',
-						value: 'command',
-					},
-					{
-						name: 'File',
-						value: 'file',
-					},
-					{
-						name: 'Preset',
+						name: 'Preset Workflow',
 						value: 'preset',
+						description: 'Run a saved RenderIO preset with input files',
+					},
+					{
+						name: 'Custom FFmpeg Command',
+						value: 'command',
+						description: 'Run custom FFmpeg or yt-dlp jobs',
+					},
+					{
+						name: 'RenderIO File Storage',
+						value: 'file',
+						description:
+							'Store, upload, retrieve, list, or delete RenderIO files',
 					},
 				],
-				default: 'command',
+				default: 'preset',
 			},
 			commandOperations,
 			...commandFields,
@@ -100,15 +104,66 @@ export class Renderio implements INodeType {
 
 				const presets = (response.presets as IDataObject[] | undefined) ?? [];
 
-				let results = presets.map((preset) => ({
-					name: (preset.name as string) || (preset.preset_id as string),
-					value: preset.preset_id as string,
-				}));
+				let results = presets.map((preset) => {
+					const presetId = preset.preset_id as string;
+					return {
+						name: (preset.name as string) || presetId,
+						value: presetId,
+						description: presetId,
+					};
+				});
 
 				if (filter) {
 					const lowerFilter = filter.toLowerCase();
-					results = results.filter((r) =>
-						r.name.toLowerCase().includes(lowerFilter),
+					results = results.filter((result) =>
+						[result.name, result.value, result.description].some((value) =>
+							value?.toLowerCase().includes(lowerFilter),
+						),
+					);
+				}
+
+				return { results };
+			},
+
+			async searchFiles(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const response = await renderioApiRequest.call(
+					this,
+					'GET',
+					'/api/v1/files',
+					undefined,
+					{ limit: 100 },
+				);
+
+				const files = (response.files as IDataObject[] | undefined) ?? [];
+
+				let results = files.map((file) => {
+					const fileId = file.file_id as string;
+					const storageUrl = file.storage_url as string | undefined;
+					const nameFromUrl = storageUrl?.split('/').pop();
+					const details = [
+						file.file_type as string | undefined,
+						file.file_format as string | undefined,
+						file.status as string | undefined,
+					]
+						.filter(Boolean)
+						.join(' / ');
+
+					return {
+						name: `${nameFromUrl || fileId}${details ? ` (${details})` : ''}`,
+						value: fileId,
+						description: storageUrl,
+					};
+				});
+
+				if (filter) {
+					const lowerFilter = filter.toLowerCase();
+					results = results.filter((result) =>
+						[result.name, result.value, result.description].some((value) =>
+							value?.toLowerCase().includes(lowerFilter),
+						),
 					);
 				}
 
@@ -161,13 +216,21 @@ export class Renderio implements INodeType {
 
 				switch (resource) {
 					case 'command':
-						responseData = await executeCommandOperation.call(this, operation, i);
+						responseData = await executeCommandOperation.call(
+							this,
+							operation,
+							i,
+						);
 						break;
 					case 'file':
 						responseData = await executeFileOperation.call(this, operation, i);
 						break;
 					case 'preset':
-						responseData = await executePresetOperation.call(this, operation, i);
+						responseData = await executePresetOperation.call(
+							this,
+							operation,
+							i,
+						);
 						break;
 					default:
 						throw new NodeOperationError(

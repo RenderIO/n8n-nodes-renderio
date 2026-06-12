@@ -34,6 +34,17 @@ const showOnlyForGet = {
 	resource: ['command'],
 };
 
+const showForAsyncCommand = {
+	operation: [
+		'run',
+		'runChained',
+		'runMultiple',
+		'downloadMedia',
+		'downloadAndProcessMedia',
+	],
+	resource: ['command'],
+};
+
 const showForRunOrChained = {
 	operation: ['run', 'runChained', 'downloadMedia', 'downloadAndProcessMedia'],
 	resource: ['command'],
@@ -59,21 +70,30 @@ const inputFilesField: INodeProperties = {
 		multipleValues: true,
 	},
 	placeholder: 'Add Input File',
-	default: {},
+	default: {
+		fileValues: [
+			{
+				key: 'in_video',
+				value: '',
+			},
+		],
+	},
 	required: true,
-	description: 'Input files for the FFmpeg command. Keys must start with "in_" and values must be URLs.',
+	description:
+		'Source files for the FFmpeg command. Keys must start with "in_" and become placeholders, for example key "in_video" is used as "&lt;&lt;in_video&gt;&gt;". Values must be URLs.',
 	options: [
 		{
 			name: 'fileValues',
 			displayName: 'Input File',
 			values: [
 				{
-					displayName: 'Key',
+					displayName: 'Input Placeholder',
 					name: 'key',
 					type: 'string',
 					default: 'in_video',
 					placeholder: 'e.g. in_video',
-					description: 'The placeholder key used in the FFmpeg command (must start with "in_")',
+					description:
+						'Placeholder key used in the FFmpeg command. Must start with "in_".',
 				},
 				{
 					displayName: 'URL',
@@ -96,21 +116,30 @@ const outputFilesField: INodeProperties = {
 		multipleValues: true,
 	},
 	placeholder: 'Add Output File',
-	default: {},
+	default: {
+		fileValues: [
+			{
+				key: 'out_video',
+				value: 'output.mp4',
+			},
+		],
+	},
 	required: true,
-	description: 'Output files for the FFmpeg command. Keys must start with "out_" and values are filenames.',
+	description:
+		'Output files created by the FFmpeg command. Keys must start with "out_" and become placeholders, for example key "out_video" is used as "&lt;&lt;out_video&gt;&gt;". Values are filenames.',
 	options: [
 		{
 			name: 'fileValues',
 			displayName: 'Output File',
 			values: [
 				{
-					displayName: 'Key',
+					displayName: 'Output Placeholder',
 					name: 'key',
 					type: 'string',
 					default: 'out_video',
 					placeholder: 'e.g. out_video',
-					description: 'The placeholder key used in the FFmpeg command (must start with "out_")',
+					description:
+						'Placeholder key used in the FFmpeg command. Must start with "out_".',
 				},
 				{
 					displayName: 'Filename',
@@ -133,21 +162,30 @@ const mediaUrlsField: INodeProperties = {
 		multipleValues: true,
 	},
 	placeholder: 'Add Media URL',
-	default: {},
+	default: {
+		urlValues: [
+			{
+				key: 'in_1',
+				value: '',
+			},
+		],
+	},
 	required: true,
-	description: 'Media URLs to download with yt-dlp. Keys must start with "in_" and can be used as FFmpeg placeholders when processing.',
+	description:
+		'Media URLs to download with yt-dlp. Keys must start with "in_" and can be used as FFmpeg placeholders when processing, for example "&lt;&lt;in_1&gt;&gt;".',
 	options: [
 		{
 			name: 'urlValues',
 			displayName: 'Media URL',
 			values: [
 				{
-					displayName: 'Key',
+					displayName: 'Downloaded Media Placeholder',
 					name: 'key',
 					type: 'string',
 					default: 'in_1',
 					placeholder: 'e.g. in_1',
-					description: 'The placeholder key for this downloaded media file (must start with "in_")',
+					description:
+						'The placeholder key for this downloaded media file (must start with "in_")',
 				},
 				{
 					displayName: 'URL',
@@ -155,7 +193,8 @@ const mediaUrlsField: INodeProperties = {
 					type: 'string',
 					default: '',
 					placeholder: 'e.g. https://www.youtube.com/watch?v=...',
-					description: 'The media URL to download. YouTube, Instagram, TikTok, and other yt-dlp-supported sites may work.',
+					description:
+						'The media URL to download. YouTube, Instagram, TikTok, and other yt-dlp-supported sites may work.',
 				},
 			],
 		},
@@ -175,37 +214,41 @@ export const commandOperations: INodeProperties = {
 			name: 'Download and Process Media',
 			value: 'downloadAndProcessMedia',
 			action: 'Download and process media',
-			description: 'Download media with yt-dlp and process it with an FFmpeg command',
+			description:
+				'Download media with yt-dlp and process it with an FFmpeg command',
 		},
 		{
 			name: 'Download Media',
 			value: 'downloadMedia',
 			action: 'Download media',
-			description: 'Download media from YouTube, Instagram, TikTok, and other yt-dlp-supported URLs',
+			description:
+				'Download media from YouTube, Instagram, TikTok, and other yt-dlp-supported URLs',
 		},
 		{
-			name: 'Get',
-			value: 'get',
-			action: 'Get a command',
-			description: 'Retrieve a command by ID to check its status and results',
-		},
-		{
-			name: 'Run',
+			name: 'Run FFmpeg Command',
 			value: 'run',
-			action: 'Run command',
-			description: 'Execute a single FFmpeg command with input and output files',
+			action: 'Run ffmpeg command',
+			description:
+				'Execute a single FFmpeg command with input and output files',
 		},
 		{
-			name: 'Run Chained',
+			name: 'Run Chained FFmpeg Commands',
 			value: 'runChained',
-			action: 'Run chained commands',
+			action: 'Run chained ffmpeg commands',
 			description: 'Execute multiple chained FFmpeg commands sequentially',
 		},
 		{
-			name: 'Run Multiple',
+			name: 'Run Multiple FFmpeg Commands',
 			value: 'runMultiple',
-			action: 'Run multiple commands',
-			description: 'Execute multiple independent FFmpeg commands in one request',
+			action: 'Run multiple ffmpeg commands',
+			description:
+				'Execute multiple independent FFmpeg commands in one request',
+		},
+		{
+			name: 'Get Command Status',
+			value: 'get',
+			action: 'Get command status',
+			description: 'Retrieve a command by ID to check its status and results',
 		},
 	],
 	default: 'run',
@@ -227,6 +270,16 @@ export const commandFields: INodeProperties[] = [
 			show: showOnlyForGet,
 		},
 	},
+	{
+		displayName:
+			'This starts a background RenderIO job and returns a command_id. Use Custom FFmpeg Command > Get Command Status with that command_id to check completion and output files.',
+		name: 'asyncCommandNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: showForAsyncCommand,
+		},
+	},
 
 	// ===========================================
 	// Run FFmpeg Command fields
@@ -244,7 +297,8 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. This field does not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
+		displayName:
+			'Legacy RenderIO placeholders use {{in_video}} and {{out_video}}. This field does not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_video&gt;&gt; placeholders.',
 		name: 'ffmpegCommandLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -253,7 +307,8 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName:
+			'Example: add input key "in_video", output key "out_video", then use -i &lt;&lt;in_video&gt;&gt; -c:v libx264 &lt;&lt;out_video&gt;&gt;. The {{ ... }} syntax is for n8n expressions.',
 		name: 'ffmpegCommandExpressionNotice',
 		type: 'notice',
 		default: '',
@@ -272,7 +327,8 @@ export const commandFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-		description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/media URL and output file keys. This is the legacy syntax for existing workflows.',
+		description:
+			'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/media URL and output file keys. This is the legacy syntax for existing workflows.',
 		displayOptions: {
 			show: showForVersion(showForRunOrDownloadAndProcessMedia, 1),
 		},
@@ -287,7 +343,8 @@ export const commandFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
-		description: 'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
+		description:
+			'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; placeholders matching your input/media URL and output file keys. Use {{ ... }} only for n8n expressions.',
 		displayOptions: {
 			show: showForVersion(showForRunOrDownloadAndProcessMedia, 2),
 		},
@@ -301,6 +358,39 @@ export const commandFields: INodeProperties[] = [
 		displayOptions: {
 			show: showOnlyForDownloadMedia,
 		},
+	},
+	{
+		displayName: 'Format',
+		name: 'formatSelector',
+		type: 'options',
+		default: 'best',
+		description: 'Quality preset for the downloaded media',
+		displayOptions: {
+			show: showOnlyForDownloadMedia,
+		},
+		options: [
+			{ name: 'Best', value: 'best', description: 'Highest available quality' },
+			{ name: '2160p (4K)', value: '2160p', description: 'Max 4K resolution' },
+			{ name: '1440p', value: '1440p', description: 'Max 1440p resolution' },
+			{
+				name: '1080p (Full HD)',
+				value: '1080p',
+				description: 'Max 1080p resolution',
+			},
+			{ name: '720p (HD)', value: '720p', description: 'Max 720p resolution' },
+			{ name: '480p (SD)', value: '480p', description: 'Max 480p resolution' },
+			{ name: '360p', value: '360p', description: 'Max 360p resolution' },
+			{
+				name: 'Audio Only',
+				value: 'audio_only',
+				description: 'Audio only, no video',
+			},
+			{
+				name: 'Worst',
+				value: 'worst',
+				description: 'Lowest available quality',
+			},
+		],
 	},
 
 	// ===========================================
@@ -335,7 +425,8 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
+		displayName:
+			'Legacy RenderIO placeholders use {{in_video}} and {{out_video}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_video&gt;&gt; placeholders.',
 		name: 'ffmpegCommandsLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -344,7 +435,8 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName:
+			'Example: add input key "in_video", output key "out_video", then use -i &lt;&lt;in_video&gt;&gt; -c:v libx264 &lt;&lt;out_video&gt;&gt;. The {{ ... }} syntax is for n8n expressions.',
 		name: 'ffmpegCommandsExpressionNotice',
 		type: 'notice',
 		default: '',
@@ -361,7 +453,13 @@ export const commandFields: INodeProperties[] = [
 		},
 		placeholder: 'Add FFmpeg Command',
 		required: true,
-		default: {},
+		default: {
+			commandValues: [
+				{
+					command: '',
+				},
+			],
+		},
 		description: 'A list of FFmpeg commands to execute sequentially (max 10)',
 		displayOptions: {
 			show: showForVersion(showOnlyForRunChained, 1),
@@ -381,7 +479,8 @@ export const commandFields: INodeProperties[] = [
 						noDataExpression: true,
 						default: '',
 						placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-						description: 'An FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/output file keys. This is the legacy syntax for existing workflows.',
+						description:
+							'An FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders matching your input/output file keys. This is the legacy syntax for existing workflows.',
 					},
 				],
 			},
@@ -396,7 +495,13 @@ export const commandFields: INodeProperties[] = [
 		},
 		placeholder: 'Add FFmpeg Command',
 		required: true,
-		default: {},
+		default: {
+			commandValues: [
+				{
+					command: '',
+				},
+			],
+		},
 		description: 'A list of FFmpeg commands to execute sequentially (max 10)',
 		displayOptions: {
 			show: showForVersion(showOnlyForRunChained, 2),
@@ -415,7 +520,8 @@ export const commandFields: INodeProperties[] = [
 						},
 						default: '',
 						placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
-						description: 'An FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
+						description:
+							'An FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
 					},
 				],
 			},
@@ -434,9 +540,10 @@ export const commandFields: INodeProperties[] = [
 		},
 		placeholder: 'Add Metadata',
 		default: {},
-		description: 'Custom key-value metadata to attach to the command (max 10 entries)',
+		description:
+			'Custom key-value metadata to attach to the command (max 10 entries)',
 		displayOptions: {
-			show: showForRunOrChained,
+			show: showForVersion(showForRunOrChained, 1),
 		},
 		options: [
 			{
@@ -461,12 +568,59 @@ export const commandFields: INodeProperties[] = [
 			},
 		],
 	},
+	{
+		displayName: 'Options',
+		name: 'commandOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: showForVersion(showForRunOrChained, 2),
+		},
+		options: [
+			{
+				displayName: 'Metadata',
+				name: 'metadata',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: 'Add Metadata',
+				default: {},
+				description:
+					'Custom key-value metadata to attach to the command (max 10 entries)',
+				options: [
+					{
+						name: 'metadataValues',
+						displayName: 'Metadata',
+						values: [
+							{
+								displayName: 'Key',
+								name: 'key',
+								type: 'string',
+								default: '',
+								description: 'The metadata key',
+							},
+							{
+								displayName: 'Value',
+								name: 'value',
+								type: 'string',
+								default: '',
+								description: 'The metadata value',
+							},
+						],
+					},
+				],
+			},
+		],
+	},
 
 	// ===========================================
 	// Run Multiple FFmpeg Commands fields
 	// ===========================================
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
+		displayName:
+			'Legacy RenderIO placeholders use {{in_video}} and {{out_video}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_video&gt;&gt; placeholders.',
 		name: 'runMultipleLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -475,7 +629,8 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName:
+			'Example: add input key "in_video", output key "out_video", then use -i &lt;&lt;in_video&gt;&gt; -c:v libx264 &lt;&lt;out_video&gt;&gt;. The {{ ... }} syntax is for n8n expressions.',
 		name: 'runMultipleExpressionNotice',
 		type: 'notice',
 		default: '',
@@ -492,7 +647,29 @@ export const commandFields: INodeProperties[] = [
 		},
 		placeholder: 'Add Command',
 		required: true,
-		default: {},
+		default: {
+			commandValues: [
+				{
+					ffmpegCommand: '',
+					inputFiles: {
+						fileValues: [
+							{
+								key: 'in_video',
+								value: '',
+							},
+						],
+					},
+					outputFiles: {
+						fileValues: [
+							{
+								key: 'out_video',
+								value: 'output.mp4',
+							},
+						],
+					},
+				},
+			],
+		},
 		description: 'A list of independent FFmpeg commands to execute (max 10)',
 		displayOptions: {
 			show: showForVersion(showOnlyForRunMultiple, 1),
@@ -513,7 +690,8 @@ export const commandFields: INodeProperties[] = [
 						required: true,
 						default: '',
 						placeholder: 'e.g. -i {{in_video}} -c:v libx264 {{out_video}}',
-						description: 'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders. This is the legacy syntax for existing workflows.',
+						description:
+							'The FFmpeg command to execute. Use {{in_key}} and {{out_key}} placeholders. This is the legacy syntax for existing workflows.',
 					},
 					{
 						displayName: 'Input Files',
@@ -524,19 +702,21 @@ export const commandFields: INodeProperties[] = [
 						},
 						placeholder: 'Add Input File',
 						default: {},
-						description: 'Input files for this command. Keys must start with "in_".',
+						description:
+							'Input files for this command. Keys must start with "in_".',
 						options: [
 							{
 								name: 'fileValues',
 								displayName: 'Input File',
 								values: [
 									{
-										displayName: 'Key',
+										displayName: 'Input Placeholder',
 										name: 'key',
 										type: 'string',
 										default: 'in_video',
 										placeholder: 'e.g. in_video',
-										description: 'Placeholder key used in the FFmpeg command (must start with "in_")',
+										description:
+											'Placeholder key used in the FFmpeg command (must start with "in_")',
 									},
 									{
 										displayName: 'URL',
@@ -559,19 +739,21 @@ export const commandFields: INodeProperties[] = [
 						},
 						placeholder: 'Add Output File',
 						default: {},
-						description: 'Output files for this command. Keys must start with "out_".',
+						description:
+							'Output files for this command. Keys must start with "out_".',
 						options: [
 							{
 								name: 'fileValues',
 								displayName: 'Output File',
 								values: [
 									{
-										displayName: 'Key',
+										displayName: 'Output Placeholder',
 										name: 'key',
 										type: 'string',
 										default: 'out_video',
 										placeholder: 'e.g. out_video',
-										description: 'Placeholder key used in the FFmpeg command (must start with "out_")',
+										description:
+											'Placeholder key used in the FFmpeg command (must start with "out_")',
 									},
 									{
 										displayName: 'Filename',
@@ -598,7 +780,29 @@ export const commandFields: INodeProperties[] = [
 		},
 		placeholder: 'Add Command',
 		required: true,
-		default: {},
+		default: {
+			commandValues: [
+				{
+					ffmpegCommand: '',
+					inputFiles: {
+						fileValues: [
+							{
+								key: 'in_video',
+								value: '',
+							},
+						],
+					},
+					outputFiles: {
+						fileValues: [
+							{
+								key: 'out_video',
+								value: 'output.mp4',
+							},
+						],
+					},
+				},
+			],
+		},
 		description: 'A list of independent FFmpeg commands to execute (max 10)',
 		displayOptions: {
 			show: showForVersion(showOnlyForRunMultiple, 2),
@@ -618,7 +822,8 @@ export const commandFields: INodeProperties[] = [
 						required: true,
 						default: '',
 						placeholder: 'e.g. -i <<in_video>> -c:v libx264 <<out_video>>',
-						description: 'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
+						description:
+							'The FFmpeg command to execute. Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. Use {{ ... }} only for n8n expressions.',
 					},
 					{
 						displayName: 'Input Files',
@@ -629,19 +834,21 @@ export const commandFields: INodeProperties[] = [
 						},
 						placeholder: 'Add Input File',
 						default: {},
-						description: 'Input files for this command. Keys must start with "in_".',
+						description:
+							'Input files for this command. Keys must start with "in_".',
 						options: [
 							{
 								name: 'fileValues',
 								displayName: 'Input File',
 								values: [
 									{
-										displayName: 'Key',
+										displayName: 'Input Placeholder',
 										name: 'key',
 										type: 'string',
 										default: 'in_video',
 										placeholder: 'e.g. in_video',
-										description: 'Placeholder key used in the FFmpeg command (must start with "in_")',
+										description:
+											'Placeholder key used in the FFmpeg command (must start with "in_")',
 									},
 									{
 										displayName: 'URL',
@@ -664,19 +871,21 @@ export const commandFields: INodeProperties[] = [
 						},
 						placeholder: 'Add Output File',
 						default: {},
-						description: 'Output files for this command. Keys must start with "out_".',
+						description:
+							'Output files for this command. Keys must start with "out_".',
 						options: [
 							{
 								name: 'fileValues',
 								displayName: 'Output File',
 								values: [
 									{
-										displayName: 'Key',
+										displayName: 'Output Placeholder',
 										name: 'key',
 										type: 'string',
 										default: 'out_video',
 										placeholder: 'e.g. out_video',
-										description: 'Placeholder key used in the FFmpeg command (must start with "out_")',
+										description:
+											'Placeholder key used in the FFmpeg command (must start with "out_")',
 									},
 									{
 										displayName: 'Filename',

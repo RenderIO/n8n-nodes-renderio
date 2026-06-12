@@ -39,10 +39,16 @@ export const fileOperations: INodeProperties = {
 	},
 	options: [
 		{
-			name: 'Delete',
-			value: 'delete',
-			action: 'Delete a file',
-			description: 'Delete a file permanently',
+			name: 'Store From URL',
+			value: 'store',
+			action: 'Store a file from URL',
+			description: 'Store a publicly accessible file URL in RenderIO storage',
+		},
+		{
+			name: 'Upload Binary File',
+			value: 'upload',
+			action: 'Upload a binary file',
+			description: 'Upload a binary file directly to RenderIO storage',
 		},
 		{
 			name: 'Get',
@@ -57,19 +63,13 @@ export const fileOperations: INodeProperties = {
 			description: 'Retrieve a list of files',
 		},
 		{
-			name: 'Store',
-			value: 'store',
-			action: 'Store a file from URL',
-			description: 'Store a file from a URL into RenderIO storage',
-		},
-		{
-			name: 'Upload',
-			value: 'upload',
-			action: 'Upload a file',
-			description: 'Upload a binary file directly to RenderIO storage',
+			name: 'Delete',
+			value: 'delete',
+			action: 'Delete a file',
+			description: 'Delete a file permanently',
 		},
 	],
-	default: 'get',
+	default: 'store',
 };
 
 export const fileFields: INodeProperties[] = [
@@ -77,16 +77,33 @@ export const fileFields: INodeProperties[] = [
 	//         file: get
 	// ----------------------------------
 	{
-		displayName: 'File ID',
+		displayName: 'File',
 		name: 'fileId',
-		type: 'string',
+		type: 'resourceLocator',
 		required: true,
-		default: '',
-		placeholder: 'e.g. 550e8400-e29b-41d4-a716-446655440000',
-		description: 'The unique identifier of the file to retrieve',
+		default: { mode: 'list', value: '' },
+		description: 'The file to retrieve',
 		displayOptions: {
 			show: showOnlyForFileGet,
 		},
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'searchFiles',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				hint: 'Enter a RenderIO file ID',
+				placeholder: 'e.g. 550e8400-e29b-41d4-a716-446655440000',
+			},
+		],
 	},
 
 	// ----------------------------------
@@ -146,7 +163,8 @@ export const fileFields: INodeProperties[] = [
 		required: true,
 		default: 'data',
 		hint: 'The name of the input binary field containing the file to upload',
-		description: 'The name of the binary property which contains the file data to upload',
+		description:
+			'The name of the binary property which contains the file data to upload',
 		displayOptions: {
 			show: showOnlyForFileUpload,
 		},
@@ -156,15 +174,32 @@ export const fileFields: INodeProperties[] = [
 	//         file: delete
 	// ----------------------------------
 	{
-		displayName: 'File ID',
+		displayName: 'File',
 		name: 'fileId',
-		type: 'string',
+		type: 'resourceLocator',
 		required: true,
-		default: '',
-		placeholder: 'e.g. 550e8400-e29b-41d4-a716-446655440000',
-		description: 'The unique identifier of the file to delete',
+		default: { mode: 'list', value: '' },
+		description: 'The file to delete permanently',
 		displayOptions: {
 			show: showOnlyForFileDelete,
 		},
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'searchFiles',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				hint: 'Enter a RenderIO file ID',
+				placeholder: 'e.g. 550e8400-e29b-41d4-a716-446655440000',
+			},
+		],
 	},
 ];

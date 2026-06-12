@@ -2,7 +2,11 @@ import nock from 'nock';
 import { Renderio } from '../Renderio.node';
 import { executeWorkflow } from './utils/executeWorkflow';
 import { CredentialsHelper } from './utils/credentialHelper';
-import { getRunTaskDataByNodeName, getTaskData, getTaskArrayData } from './utils/getNodeResultData';
+import {
+	getRunTaskDataByNodeName,
+	getTaskData,
+	getTaskArrayData,
+} from './utils/getNodeResultData';
 import * as fixtures from './utils/fixtures';
 
 import getCommandWorkflow from './workflows/commands/get-command.workflow.json';
@@ -60,6 +64,25 @@ describe('Renderio Node', () => {
 			expect(renderioNode.description.usableAsTool).toBe(true);
 		});
 
+		it('should use user-facing resource names with presets as the default path', () => {
+			const resourceProperty = renderioNode.description.properties.find(
+				(property) => property.name === 'resource',
+			);
+
+			expect(resourceProperty?.default).toBe('preset');
+			expect(resourceProperty?.options).toEqual([
+				expect.objectContaining({ name: 'Preset Workflow', value: 'preset' }),
+				expect.objectContaining({
+					name: 'Custom FFmpeg Command',
+					value: 'command',
+				}),
+				expect.objectContaining({
+					name: 'RenderIO File Storage',
+					value: 'file',
+				}),
+			]);
+		});
+
 		it('should expose legacy and expression-enabled node versions', () => {
 			expect(renderioNode.description.version).toEqual([1, 2]);
 
@@ -67,15 +90,38 @@ describe('Renderio Node', () => {
 				(property) => property.name === 'ffmpegCommand',
 			);
 			const legacyField = commandFields.find((property) =>
-				(property.displayOptions?.show?.['@version'] as number[] | undefined)?.includes(1),
+				(
+					property.displayOptions?.show?.['@version'] as number[] | undefined
+				)?.includes(1),
 			);
 			const expressionField = commandFields.find((property) =>
-				(property.displayOptions?.show?.['@version'] as number[] | undefined)?.includes(2),
+				(
+					property.displayOptions?.show?.['@version'] as number[] | undefined
+				)?.includes(2),
 			);
 
 			expect(legacyField?.noDataExpression).toBe(true);
 			expect(expressionField?.noDataExpression).toBeUndefined();
 			expect(expressionField?.placeholder).toContain('<<in_video>>');
+		});
+
+		it('should expose searchable file selectors for file get and delete', () => {
+			const fileIdFields = renderioNode.description.properties.filter(
+				(property) => property.name === 'fileId',
+			);
+
+			expect(fileIdFields).toHaveLength(2);
+			expect(fileIdFields).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						type: 'resourceLocator',
+						modes: expect.arrayContaining([
+							expect.objectContaining({ name: 'list' }),
+							expect.objectContaining({ name: 'id' }),
+						]),
+					}),
+				]),
+			);
 		});
 	});
 
@@ -93,7 +139,10 @@ describe('Renderio Node', () => {
 				workflow: getCommandWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Get command');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Get command',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -113,7 +162,10 @@ describe('Renderio Node', () => {
 				workflow: runCommandWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run command');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Run command',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -139,9 +191,7 @@ describe('Renderio Node', () => {
 								],
 							},
 							outputFiles: {
-								fileValues: [
-									{ key: 'out_video', value: 'output.mp4' },
-								],
+								fileValues: [{ key: 'out_video', value: 'output.mp4' }],
 							},
 							ffmpegCommand: '-i <<in_video>> -c:v libx264 <<out_video>>',
 							metadata: {},
@@ -163,11 +213,67 @@ describe('Renderio Node', () => {
 				workflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run command v2');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Run command v2',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
 			expect(getTaskData(nodeResult)).toEqual(mockResult);
+			expect(scope.isDone()).toBe(true);
+		});
+
+		it('should send version 2 command metadata from options', async () => {
+			const mockResult = fixtures.runCommandResult();
+			const workflow = {
+				nodes: [
+					{
+						name: 'Run command v2',
+						type: 'n8n-nodes-renderio.renderio',
+						typeVersion: 2,
+						parameters: {
+							authentication: 'apiKey',
+							resource: 'command',
+							operation: 'run',
+							inputFiles: {
+								fileValues: [
+									{ key: 'in_video', value: 'https://example.com/input.mp4' },
+								],
+							},
+							outputFiles: {
+								fileValues: [{ key: 'out_video', value: 'output.mp4' }],
+							},
+							ffmpegCommand: '-i <<in_video>> -c:v libx264 <<out_video>>',
+							commandOptions: {
+								metadata: {
+									metadataValues: [{ key: 'source', value: 'n8n' }],
+								},
+							},
+						},
+					},
+				],
+			};
+
+			const scope = nock('https://renderio.dev')
+				.post('/api/v1/run-ffmpeg-command', {
+					input_files: { in_video: 'https://example.com/input.mp4' },
+					output_files: { out_video: 'output.mp4' },
+					metadata: { source: 'n8n' },
+					ffmpeg_command: '-i <<in_video>> -c:v libx264 <<out_video>>',
+				})
+				.reply(200, mockResult);
+
+			const { executionData } = await executeWorkflow({
+				credentialsHelper,
+				workflow,
+			});
+
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Run command v2',
+			);
+			expect(nodeResults.length).toBe(1);
 			expect(scope.isDone()).toBe(true);
 		});
 
@@ -188,9 +294,7 @@ describe('Renderio Node', () => {
 								],
 							},
 							outputFiles: {
-								fileValues: [
-									{ key: 'out_video', value: 'output.mp4' },
-								],
+								fileValues: [{ key: 'out_video', value: 'output.mp4' }],
 							},
 							ffmpegCommand: '-i {{in_video}} -c:v libx264 {{out_video}}',
 						},
@@ -201,6 +305,66 @@ describe('Renderio Node', () => {
 			await expect(
 				executeWorkflow({ credentialsHelper, workflow }),
 			).rejects.toThrow('Use <<alias>> placeholders in FFmpeg commands');
+		});
+
+		it('should reject command placeholders without matching input or output keys', async () => {
+			const workflow = {
+				nodes: [
+					{
+						name: 'Run command v2',
+						type: 'n8n-nodes-renderio.renderio',
+						typeVersion: 2,
+						parameters: {
+							authentication: 'apiKey',
+							resource: 'command',
+							operation: 'run',
+							inputFiles: {
+								fileValues: [
+									{ key: 'in_video', value: 'https://example.com/input.mp4' },
+								],
+							},
+							outputFiles: {
+								fileValues: [{ key: 'out_video', value: 'output.mp4' }],
+							},
+							ffmpegCommand: '-i <<missing_video>> -c:v libx264 <<out_video>>',
+						},
+					},
+				],
+			};
+
+			await expect(
+				executeWorkflow({ credentialsHelper, workflow }),
+			).rejects.toThrow('FFmpeg command references unknown placeholders');
+		});
+
+		it('should reject invalid input placeholder prefixes before sending a request', async () => {
+			const workflow = {
+				nodes: [
+					{
+						name: 'Run command v2',
+						type: 'n8n-nodes-renderio.renderio',
+						typeVersion: 2,
+						parameters: {
+							authentication: 'apiKey',
+							resource: 'command',
+							operation: 'run',
+							inputFiles: {
+								fileValues: [
+									{ key: 'video', value: 'https://example.com/input.mp4' },
+								],
+							},
+							outputFiles: {
+								fileValues: [{ key: 'out_video', value: 'output.mp4' }],
+							},
+							ffmpegCommand: '-i <<video>> -c:v libx264 <<out_video>>',
+						},
+					},
+				],
+			};
+
+			await expect(
+				executeWorkflow({ credentialsHelper, workflow }),
+			).rejects.toThrow('Input placeholder must start with "in_"');
 		});
 
 		it('should run chained FFmpeg commands', async () => {
@@ -215,7 +379,10 @@ describe('Renderio Node', () => {
 				workflow: runChainedWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run chained');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Run chained',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -235,7 +402,10 @@ describe('Renderio Node', () => {
 				workflow: runMultipleWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Run multiple');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Run multiple',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -261,7 +431,10 @@ describe('Renderio Node', () => {
 				workflow: downloadMediaWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Download media');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Download media',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -286,7 +459,10 @@ describe('Renderio Node', () => {
 				workflow: downloadAndProcessMediaWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Download and process media');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Download and process media',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -337,7 +513,9 @@ describe('Renderio Node', () => {
 
 			const data = getTaskArrayData(nodeResult);
 			expect(Array.isArray(data)).toBe(true);
-			expect(data?.map((item: { json: any }) => item.json)).toEqual(mockFiles.files);
+			expect(data?.map((item: { json: any }) => item.json)).toEqual(
+				mockFiles.files,
+			);
 			expect(scope.isDone()).toBe(true);
 		});
 
@@ -374,7 +552,10 @@ describe('Renderio Node', () => {
 				workflow: deleteFileWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Delete file');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Delete file',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
@@ -418,14 +599,19 @@ describe('Renderio Node', () => {
 				workflow: getPresetsWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Get presets');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Get presets',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');
 
 			const data = getTaskArrayData(nodeResult);
 			expect(Array.isArray(data)).toBe(true);
-			expect(data?.map((item: { json: any }) => item.json)).toEqual(mockPresets.presets);
+			expect(data?.map((item: { json: any }) => item.json)).toEqual(
+				mockPresets.presets,
+			);
 			expect(scope.isDone()).toBe(true);
 		});
 
@@ -442,7 +628,10 @@ describe('Renderio Node', () => {
 				workflow: executePresetWorkflow,
 			});
 
-			const nodeResults = getRunTaskDataByNodeName(executionData, 'Execute preset');
+			const nodeResults = getRunTaskDataByNodeName(
+				executionData,
+				'Execute preset',
+			);
 			expect(nodeResults.length).toBe(1);
 			const [nodeResult] = nodeResults;
 			expect(nodeResult.executionStatus).toBe('success');

@@ -63,21 +63,21 @@ export const presetOperations: INodeProperties = {
 	},
 	options: [
 		{
-			name: 'Execute',
+			name: 'Execute Preset',
 			value: 'execute',
 			action: 'Execute a preset',
 			description: 'Run a preset with provided input files',
 		},
 		{
-			name: 'Get',
+			name: 'Get Preset',
 			value: 'get',
 			action: 'Get a preset',
 			description: 'Retrieve a single preset by ID',
 		},
 		{
-			name: 'Get Many',
+			name: 'List Presets',
 			value: 'getMany',
-			action: 'Get many presets',
+			action: 'List presets',
 			description: 'Retrieve a list of presets',
 		},
 	],
@@ -118,6 +118,16 @@ export const presetFields: INodeProperties[] = [
 		],
 	},
 	{
+		displayName:
+			'This starts a background RenderIO job and returns a command_id. Use Custom FFmpeg Command > Get Command Status with that command_id to check completion and output files.',
+		name: 'asyncPresetNotice',
+		type: 'notice',
+		default: '',
+		displayOptions: {
+			show: showOnlyForExecute,
+		},
+	},
+	{
 		displayName: 'Input Files',
 		name: 'inputFiles',
 		type: 'fixedCollection',
@@ -127,7 +137,9 @@ export const presetFields: INodeProperties[] = [
 		placeholder: 'Add Input File',
 		default: {},
 		required: true,
-		description: 'Input files for execution. Keys must match the preset\'s input_file_keys.',
+		hint: 'Select a preset first to load its required input keys.',
+		description:
+			"Input files for execution. Keys must match the preset's input_file_keys.",
 		displayOptions: {
 			show: showOnlyForExecute,
 		},
@@ -137,7 +149,7 @@ export const presetFields: INodeProperties[] = [
 				displayName: 'Input File',
 				values: [
 					{
-						displayName: 'Key Name or ID',
+						displayName: 'Input Key Name or ID',
 						name: 'key',
 						type: 'options',
 						typeOptions: {
@@ -145,7 +157,8 @@ export const presetFields: INodeProperties[] = [
 							loadOptionsDependsOn: ['presetId'],
 						},
 						default: '',
-						description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+						description:
+							'Input key required by the selected preset, for example in_video. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 					},
 					{
 						displayName: 'URL',
@@ -178,7 +191,8 @@ export const presetFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				placeholder: 'e.g. https://example.com/webhook',
-				description: 'URL to receive a webhook notification when the execution completes',
+				description:
+					'URL to receive a webhook notification when the execution completes',
 			},
 		],
 	},

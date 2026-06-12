@@ -11,7 +11,10 @@ export class RenderioApi implements ICredentialType {
 
 	displayName = 'RenderIO API';
 
-	icon: Icon = { light: 'file:../icons/renderio.svg', dark: 'file:../icons/renderio.dark.svg' };
+	icon: Icon = {
+		light: 'file:../icons/renderio.svg',
+		dark: 'file:../icons/renderio.dark.svg',
+	};
 
 	documentationUrl = 'https://renderio.dev/docs';
 
@@ -29,14 +32,16 @@ export class RenderioApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 			placeholder: 'e.g. ffsk_abc123...',
-			description: 'Your RenderIO API key. Starts with ffsk_.',
+			description:
+				'Paste an API key from RenderIO Dashboard > API Keys. Keys start with ffsk_.',
 		},
 		{
-			displayName: 'Base URL',
+			displayName: 'Base URL (Advanced)',
 			name: 'baseUrl',
 			type: 'string',
 			default: 'https://renderio.dev',
-			description: 'The base URL of the RenderIO API',
+			description:
+				'Leave as https://renderio.dev unless RenderIO support gave you a different API base URL.',
 		},
 	];
 

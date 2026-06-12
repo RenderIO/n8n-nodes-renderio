@@ -2,10 +2,33 @@ import type {
 	IExecuteFunctions,
 	INodeExecutionData,
 	IDataObject,
+	INodeParameterResourceLocator,
 	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import { renderioApiRequest } from '../../shared/transport';
+
+function getResourceLocatorValue(
+	value: string | INodeParameterResourceLocator,
+): string {
+	return typeof value === 'string'
+		? value.trim()
+		: String(value.value ?? '').trim();
+}
+
+function assertNonEmptyParameter(
+	context: IExecuteFunctions,
+	value: string,
+	fieldName: string,
+	i: number,
+): void {
+	if (value.trim()) return;
+
+	throw new NodeOperationError(context.getNode(), `${fieldName} is required`, {
+		description: `Set a value for "${fieldName}".`,
+		itemIndex: i,
+	});
+}
 
 export async function executeFileOperation(
 	this: IExecuteFunctions,
@@ -15,7 +38,12 @@ export async function executeFileOperation(
 	let responseData;
 
 	if (operation === 'get') {
-		const fileId = this.getNodeParameter('fileId', i) as string;
+		const fileId = getResourceLocatorValue(
+			this.getNodeParameter('fileId', i) as
+				| string
+				| INodeParameterResourceLocator,
+		);
+		assertNonEmptyParameter(this, fileId, 'File', i);
 
 		try {
 			responseData = await renderioApiRequest.call(
@@ -94,6 +122,7 @@ export async function executeFileOperation(
 		}
 	} else if (operation === 'store') {
 		const fileUrl = this.getNodeParameter('fileUrl', i) as string;
+		assertNonEmptyParameter(this, fileUrl, 'File URL', i);
 
 		try {
 			responseData = await renderioApiRequest.call(
@@ -109,16 +138,25 @@ export async function executeFileOperation(
 			});
 		}
 	} else if (operation === 'upload') {
-		const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+		const binaryPropertyName = this.getNodeParameter(
+			'binaryPropertyName',
+			i,
+		) as string;
+		assertNonEmptyParameter(this, binaryPropertyName, 'Input Binary Field', i);
 		const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
-		const dataBuffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
+		const dataBuffer = await this.helpers.getBinaryDataBuffer(
+			i,
+			binaryPropertyName,
+		);
 
 		const credentials = await this.getCredentials('renderioApi');
 		const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
 
 		try {
 			const formData = new FormData();
-			const blob = new Blob([new Uint8Array(dataBuffer)], { type: binaryData.mimeType });
+			const blob = new Blob([new Uint8Array(dataBuffer)], {
+				type: binaryData.mimeType,
+			});
 			formData.append('file', blob, binaryData.fileName || 'file');
 
 			responseData = await this.helpers.httpRequestWithAuthentication.call(
@@ -140,7 +178,12 @@ export async function executeFileOperation(
 			});
 		}
 	} else if (operation === 'delete') {
-		const fileId = this.getNodeParameter('fileId', i) as string;
+		const fileId = getResourceLocatorValue(
+			this.getNodeParameter('fileId', i) as
+				| string
+				| INodeParameterResourceLocator,
+		);
+		assertNonEmptyParameter(this, fileId, 'File', i);
 
 		try {
 			responseData = await renderioApiRequest.call(

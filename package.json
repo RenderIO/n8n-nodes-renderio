@@ -1,7 +1,7 @@
 {
     "name": "n8n-nodes-renderio",
     "version": "0.1.7",
-    "description": "n8n community node for RenderIO - run FFmpeg commands and download web media in the cloud",
+    "description": "n8n community node for RenderIO - process video and audio with FFmpeg, download media with yt-dlp, and store outputs",
     "license": "MIT",
     "homepage": "https://renderio.dev",
     "keywords": [
@@ -10,6 +10,12 @@
         "n8n",
         "ffmpeg",
         "yt-dlp",
+        "video",
+        "audio",
+        "media",
+        "transcode",
+        "render",
+        "download",
         "youtube",
         "instagram",
         "tiktok",

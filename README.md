@@ -98,36 +98,47 @@ npm run build
 
 ## Operations
 
-This node supports a wide range of RenderIO operations, organized by resource type:
+This node supports a wide range of RenderIO operations, organized by resource type in the n8n UI:
 
-### Command
+### Preset Workflow
 
-- **Run**: Execute a single FFmpeg command
-  - Provide FFmpeg arguments and input files
-  - Configurable output format and options
-  - Background processing with status polling
-- **Run Chained**: Execute multiple sequential FFmpeg commands
-  - Chain commands where output of one feeds into the next
-  - Useful for multi-step media processing pipelines
-- **Run Multiple**: Execute multiple independent FFmpeg commands in parallel
-  - Process multiple files simultaneously
-  - Each command runs independently
-- **Download Media**: Download media with yt-dlp
-  - Supports YouTube, Instagram, TikTok, and other yt-dlp-supported URLs
-  - Stores downloaded media as RenderIO output files
+- **Execute Preset**: Run a preset with input files
+  - Use predefined FFmpeg command templates
+  - Pass different input files to reusable presets
+  - Searchable preset list via dynamic dropdown
+  - Returns a `command_id` for status checks
+- **Get Preset**: Retrieve a preset by ID
+  - View preset configuration and FFmpeg command template
+- **List Presets**: Browse available presets
+
+### Custom FFmpeg Command
+
 - **Download and Process Media**: Download media with yt-dlp and process it with FFmpeg
   - Use downloaded media as `<<in_key>>` placeholders in an FFmpeg command
   - Create transformed outputs such as clips, GIFs, resized videos, or extracted audio
-- **Get**: Retrieve a command by ID
+- **Download Media**: Download media with yt-dlp
+  - Supports YouTube, Instagram, TikTok, and other yt-dlp-supported URLs
+  - Stores downloaded media as RenderIO output files
+- **Run FFmpeg Command**: Execute a single FFmpeg command
+  - Provide FFmpeg arguments and input files
+  - Configurable output format and options
+  - Background processing with status polling
+- **Run Chained FFmpeg Commands**: Execute multiple sequential FFmpeg commands
+  - Chain commands where output of one feeds into the next
+  - Useful for multi-step media processing pipelines
+- **Run Multiple FFmpeg Commands**: Execute multiple independent FFmpeg commands in parallel
+  - Process multiple files simultaneously
+  - Each command runs independently
+- **Get Command Status**: Retrieve a command by ID
   - Check processing status (queued, processing, completed, failed)
   - Access output file references and metadata
 
-### File
+### RenderIO File Storage
 
-- **Store**: Store a file from a URL into RenderIO
+- **Store From URL**: Store a file from a URL into RenderIO
   - Import media from any publicly accessible URL
   - File is stored in RenderIO's cloud storage for processing
-- **Upload**: Upload a binary file
+- **Upload Binary File**: Upload a binary file
   - Upload files directly from your n8n workflow
   - Supports any media format compatible with FFmpeg
 - **Get**: Retrieve a file by ID
@@ -137,17 +148,6 @@ This node supports a wide range of RenderIO operations, organized by resource ty
   - Pagination support
 - **Delete**: Delete a file
   - Remove files from cloud storage
-
-### Preset
-
-- **Execute**: Run a preset with input files
-  - Use predefined FFmpeg command templates
-  - Pass different input files to reusable presets
-  - Searchable preset list via dynamic dropdown
-- **Get**: Retrieve a preset by ID
-  - View preset configuration and FFmpeg command template
-- **Get Many**: List presets
-  - Browse available presets
 
 ### AI Tools
 
@@ -176,13 +176,20 @@ For more details, see the [authentication documentation](https://renderio.dev/do
 
 ## Usage
 
-1. **Store or upload media**: Use **File > Store** to import a media file from a URL, or **File > Upload** to upload a binary file directly.
-2. **Download web media**: Use **Command > Download Media** for YouTube, Instagram, TikTok, and other yt-dlp-supported URLs.
-3. **Run an FFmpeg command**: Use **Command > Run** to execute an FFmpeg command on the stored file, or **Command > Download and Process Media** to download and transform web media in one job.
-4. **Check status**: Use **Command > Get** to poll for processing completion.
-5. **Retrieve results**: Use **File > Get** to access the output file.
+1. **Run a preset first**: Use **Preset Workflow > Execute Preset**, choose a preset, and add the requested input file URLs.
+2. **Use a custom command when needed**: Use **Custom FFmpeg Command > Run FFmpeg Command** for raw FFmpeg, or **Custom FFmpeg Command > Download and Process Media** to download and transform web media in one job.
+3. **Check status**: Use **Custom FFmpeg Command > Get Command Status** with the returned `command_id`.
+4. **Retrieve results**: Use **RenderIO File Storage > Get** to access an output file by ID or from the searchable file list.
+5. **Store or upload reusable media**: Use **RenderIO File Storage > Store From URL** or **Upload Binary File**.
 
-For repeated operations, create a **Preset** with your FFmpeg command template, then use **Preset > Execute** to run it with different input files.
+For repeated operations, create a **Preset** with your FFmpeg command template, then use **Preset Workflow > Execute Preset** to run it with different input files.
+
+Common fields returned by the node:
+
+- `command_id`: Use this with **Get Command Status**.
+- `status`: Current job or file status.
+- `file_id`: Use this with **RenderIO File Storage > Get**.
+- `storage_url`: Direct URL for a stored or output file when available.
 
 ## Placeholder syntax
 
@@ -221,7 +228,7 @@ Track changes and updates to the node here.
    - Verify the FFmpeg arguments are valid
    - Check that input files exist and are accessible
    - In node version 2, use `<<alias>>` for RenderIO placeholders and reserve `{{ ... }}` for n8n expressions
-   - Review the command status via **Command > Get** for detailed error messages
+   - Review the command status via **Custom FFmpeg Command > Get Command Status** for detailed error messages
 
 3. **File upload issues**
    - Ensure the file URL is publicly accessible (for Store operations)
@@ -229,7 +236,7 @@ Track changes and updates to the node here.
    - Check file size limits on your RenderIO plan
 
 4. **Operation timeouts**
-   - FFmpeg processing runs in the background; use **Command > Get** to poll for completion
+   - FFmpeg processing runs in the background; use **Custom FFmpeg Command > Get Command Status** to poll for completion
    - Large files or complex operations may take longer to process
 
 ### Getting help
