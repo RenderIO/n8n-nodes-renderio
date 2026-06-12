@@ -1,6 +1,6 @@
 {
     "name": "n8n-nodes-renderio",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "n8n community node for RenderIO - run FFmpeg commands and download web media in the cloud",
     "license": "MIT",
     "homepage": "https://renderio.dev",
