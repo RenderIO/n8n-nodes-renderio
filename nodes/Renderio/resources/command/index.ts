@@ -244,7 +244,7 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. This field does not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. This field does not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
 		name: 'ffmpegCommandLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -253,7 +253,7 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
 		name: 'ffmpegCommandExpressionNotice',
 		type: 'notice',
 		default: '',
@@ -335,7 +335,7 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
 		name: 'ffmpegCommandsLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -344,7 +344,7 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
 		name: 'ffmpegCommandsExpressionNotice',
 		type: 'notice',
 		default: '',
@@ -466,7 +466,7 @@ export const commandFields: INodeProperties[] = [
 	// Run Multiple FFmpeg Commands fields
 	// ===========================================
 	{
-		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with <<in_key>> placeholders.',
+		displayName: 'Legacy RenderIO placeholders use {{in_key}} and {{out_key}}. These fields do not support n8n expressions. New workflows should use node version 2 with &lt;&lt;in_key&gt;&gt; placeholders.',
 		name: 'runMultipleLegacyNotice',
 		type: 'notice',
 		default: '',
@@ -475,7 +475,7 @@ export const commandFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Use <<in_key>> and <<out_key>> for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
+		displayName: 'Use &lt;&lt;in_key&gt;&gt; and &lt;&lt;out_key&gt;&gt; for RenderIO placeholders. The {{ ... }} syntax is reserved for n8n expressions in this version.',
 		name: 'runMultipleExpressionNotice',
 		type: 'notice',
 		default: '',
